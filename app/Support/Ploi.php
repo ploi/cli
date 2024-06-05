@@ -188,4 +188,9 @@ class Ploi
         return Http::withToken($this->token)->get(self::$BASE_URL . "servers/{$server}/sites/{$site}/log/{$log}")['data'];
     }
 
+    public function getUser()
+    {
+        return Http::withToken($this->token)->get(self::$BASE_URL . "user")['data'];
+    }
+
 }

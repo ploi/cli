@@ -13,19 +13,25 @@
         {
             "name": "Felix Schmid",
             "email": "hallo@felix-schmid.de"
+        },
+        {
+            "name": "Stan Menten",
+            "email": "stanmenten@live.nl"
         }
     ],
     "require": {
-        "php": "^8.0"
+        "php": "^8.3",
+        "laravel/prompts": "^0.1.21",
+        "ploi/ploi-php-sdk": "^1.9"
     },
     "require-dev": {
-        "guzzlehttp/guzzle": "^7.4",
-        "illuminate/http": "^9.0",
-        "laravel-zero/framework": "^9.0",
-        "mockery/mockery": "^1.4.2",
-        "nunomaduro/laravel-console-menu": "^3.3",
-        "phpunit/phpunit": "^9.5",
-        "symfony/yaml": "^5.1"
+        "guzzlehttp/guzzle": "^7.8",
+        "illuminate/http": "^11.0",
+        "laravel-zero/framework": "^11.0",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/laravel-console-menu": "^3.5",
+        "phpunit/phpunit": "^11.1",
+        "symfony/yaml": "^7.0"
     },
     "autoload": {
         "psr-4": {
