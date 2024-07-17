@@ -6,9 +6,7 @@ use App\Concerns\EnsureHasPloiConfiguration;
 use App\Concerns\EnsureHasToken;
 use App\Services\ScriptService;
 use LaravelZero\Framework\Commands\Command;
-use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
-use function Laravel\Prompts\textarea;
 
 class ScriptDeleteCommand extends Command
 {
