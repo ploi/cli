@@ -36,10 +36,9 @@ class IncidentCreateCommand extends Command
             required: 'Label is required.',
             hint: 'The title to recognize the incident'
         );
-
+        
         $description = textarea(
             label: 'What is the description of the incident?',
-            required: 'Description is required.',
         );
 
         $severity = select(
