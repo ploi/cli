@@ -12,8 +12,8 @@ If you discover any security related issues, please email security@ploi.io inste
 
 ## Credits
 
-- [Felix Schmid](https://github.com/schmidfelix)
-- [Stan Menten](https://stanmenten.dev/)
+- [Felix Schmid](https://github.com/schmidfelix) (Original author)
+- [Stan Menten](https://stanmenten.dev/) (Maintainer)
 - [Ploi](https://ploi.io)
 - [All Contributors](../../contributors)
 
