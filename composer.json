@@ -1,12 +1,12 @@
 {
-    "name": "schmidfelix/ploi-cli",
+    "name": "ploi/ploi-cli",
     "description": "Command line interface for ploi.",
     "keywords": [
         "ploi",
         "ploi-cli",
         "cli"
     ],
-    "homepage": "https://felix-schmid.de",
+    "homepage": "https://ploi.io",
     "type": "project",
     "license": "MIT",
     "authors": [
@@ -17,6 +17,10 @@
         {
             "name": "Stan Menten",
             "email": "stanmenten@live.nl"
+        },
+        {
+            "name": "Ploi",
+            "email": "info@ploi.io"
         }
     ],
     "require": {
