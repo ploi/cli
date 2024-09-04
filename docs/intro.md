@@ -7,7 +7,7 @@ weight: 1
 
 ### Authentication
 ```shell script
-ploi token <token> {--force?}
+ploi login <token> {--force?}
 ```
 
 ### Initialize a new project in your current directory
