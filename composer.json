@@ -19,6 +19,12 @@
             "email": "stanmenten@live.nl"
         }
     ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/Users/stan/Documents/Development/playground/ploi-cli"
+        }
+    ],
     "require": {
         "php": "^8.3",
         "laravel/prompts": "^0.1.21",

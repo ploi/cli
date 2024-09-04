@@ -9,6 +9,8 @@ use App\Support\Ploi;
 use Exception;
 use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
+use function Laravel\Prompts\select;
+use function Laravel\Prompts\confirm;
 
 class InitCommand extends Command
 {
@@ -21,56 +23,47 @@ class InitCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'init';
+    protected $signature = 'init {--force : Force reinitialization of the configuration}';
 
     /**
      * The description of the command.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Init Ploi.yml configuration file';
 
     /**
      * Execute the console command.
      *
      * @param Ploi $ploi
      * @param Configuration $configuration
-     * @return mixed
+     * @return void
      */
-    public function handle(Ploi $ploi, Configuration $configuration)
+    public function handle(Ploi $ploi, Configuration $configuration): void
     {
         $this->ensureHasToken();
-        if ($this->hasPloiConfiguration()) {
-            $this->error('This site is already initialized!');
+        if ($this->hasPloiConfiguration() && !$this->option('force')) {
+            $this->error('This site is already initialized! Use --force to reinitialize.');
             exit(1);
         }
 
         $servers = $ploi->getServers();
-        $selectedServer = $this->menu('Which server you want to use?', collect($servers)->map(function ($server) {
-            return $server['name'] . ' - ' . $server['ip_address'];
-        })->toArray())->open();
-        if ($selectedServer === null) exit(1);
-        $serverId = $servers[$selectedServer]['id'];
+        $serverId = select('Select a server:', collect($servers)->pluck('name', 'id')->toArray());
 
-        $createNewSite = $this->confirm('Do want to create a new site on that server?', 1);
+        $createNewSite = confirm('Do want to create a new site on that server?', true);
 
         if ($createNewSite) {
             [$siteId, $domain] = $this->createNewSite($ploi, $serverId);
             $this->info("Created a new site with id {$siteId}!");
         } else {
             $sites = $ploi->getSites($serverId);
-            $selectedDomain = $this->menu('On which site you want to install the repository?', collect($sites)->map(function ($site) {
-                return $site['domain'];
-            })->toArray())->open();
-            if ($selectedDomain === null) exit(1);
-
-            $siteId = $sites[$selectedDomain]['id'];
-            $domain = $sites[$selectedDomain]['domain'];
+            $siteId = select('On which site you want to install the repository?', collect($sites)->pluck('domain', 'id')->toArray());
+            $domain = collect($sites)->firstWhere('id', $siteId)['domain'];
         }
 
         $configuration->initialize($serverId, $siteId, getcwd(), $domain);
 
-        if(isset($selectedDomain)) {
+        if(!$createNewSite) {
             $this->info("Your project got linked to {$domain}!");
             exit(0);
         }

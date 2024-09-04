@@ -9,10 +9,10 @@ use Symfony\Component\Yaml\Yaml;
 class Configuration
 {
     /** @var array */
-    protected $config;
+    protected mixed $config;
 
     /** @var Ploi */
-    protected $ploi;
+    protected Ploi $ploi;
 
     public function __construct(Ploi $ploi)
     {
@@ -25,7 +25,7 @@ class Configuration
         }
     }
 
-    public function initialize(string $server, string $site, string $path, string $domain)
+    public function initialize(string $server, string $site, string $path, string $domain): void
     {
         $configFile = $path . '/ploi.yml';
 
@@ -34,7 +34,7 @@ class Configuration
         $this->store($configFile);
     }
 
-    protected function getConfigFormat(string $server, string $site, string $domain)
+    protected function getConfigFormat(string $server, string $site, string $domain): array
     {
         return [
             'site' => $site,
@@ -43,7 +43,7 @@ class Configuration
         ];
     }
 
-    public function store(string $configFile)
+    public function store(string $configFile): void
     {
         $configContent = Yaml::dump($this->config, 4, 2, Yaml::DUMP_EMPTY_ARRAY_AS_SEQUENCE);
 
@@ -55,7 +55,7 @@ class Configuration
         return Arr::get($this->config, $key, $default);
     }
 
-    public function set(string $key, $value)
+    public function set(string $key, $value): void
     {
         Arr::set($this->config, $key, $value);
     }
