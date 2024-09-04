@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Commands;
+namespace App\Commands\v1;
 
 use App\Concerns\EnsureHasPloiConfiguration;
 use App\Concerns\EnsureHasToken;
 use App\Support\Configuration;
 use App\Support\Ploi;
-use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
 
 class SshCommand extends Command

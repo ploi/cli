@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands;
+namespace App\Commands\v1;
 
 use App\Concerns\EnsureHasToken;
 use App\Support\Ploi;
