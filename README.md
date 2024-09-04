@@ -1,19 +1,20 @@
-![](https://banners.beyondco.de/Ploi%20CLI.png?theme=light&packageManager=composer+require&packageName=schmidfelix%2Fploi-cli&pattern=hexagons&style=style_1&description=A+simple+command+line+interface+which+makes+deploying+with+ploi+even+easier.&md=1&showWatermark=0&fontSize=100px&images=terminal)
-
+![](screenshots/cli-banner.jpg)
 # Ploi CLI
 
-A easy to use command line interface for [ploi](https://ploi.io/register?referrer=fYthUW3wM4ee3RnUfput) (referral link).
+An easy-to-use command line interface for [ploi](https://ploi.io/register).
 
 ## Documentation
 
-You can see the full documentation on its [website](https://felix-schmid.de/docs/ploi-cli).
+You can see the full documentation on its [website](https://cli.ploi.io).
 
 ### Security
-If you discover any security related issues, please email security@felix-schmid.de instead of using the issue tracker.
+If you discover any security related issues, please email security@ploi.io instead of using the issue tracker.
 
 ## Credits
 
-- [Felix Schmid](https://github.com/schmidfelix)
+- [Felix Schmid](https://github.com/schmidfelix) (Original author)
+- [Stan Menten](https://stanmenten.dev/) (Maintainer)
+- [Ploi](https://ploi.io)
 - [All Contributors](../../contributors)
 
 ## License
