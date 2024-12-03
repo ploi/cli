@@ -1,0 +1,165 @@
+<?php
+
+namespace App\Commands;
+
+use App\Traits\EnsureHasPloiConfiguration;
+use App\Traits\EnsureHasToken;
+use Exception;
+
+use function Laravel\Prompts\confirm;
+use function Laravel\Prompts\select;
+use function Laravel\Prompts\spin;
+use function Laravel\Prompts\text;
+
+class InitCommand extends Command
+{
+    use EnsureHasPloiConfiguration, EnsureHasToken;
+
+    protected $signature = 'init {--force : Force reinitialization of the configuration}';
+
+    protected $description = 'Initialize your site with Ploi.io';
+
+    public function handle(): void
+    {
+        $this->ensureHasToken();
+
+        if ($this->isAlreadyInitialized()) {
+            $this->errorLine('This site is already initialized! Use --force to reinitialize.');
+            exit(1);
+        }
+
+        $server = $this->selectServer();
+
+        $createNewSite = confirm("Do you want to create a new site on server <fg=green>[{$server['name']}]</>?", true);
+
+        $siteDetails = $createNewSite
+            ? $this->createNewSite($server['id'])
+            : $this->selectExistingSite($server['id']);
+
+        $this->configuration->initialize($server['id'], $siteDetails['id'], getcwd(), $siteDetails['domain']);
+
+        $this->linkProject($createNewSite, $siteDetails['domain']);
+
+        if (confirm('Do you want to initialize the repository?')) {
+            $this->call('install:repo --server='.$server['id'].' --site='.$siteDetails['id']);
+        }
+
+    }
+
+    protected function isAlreadyInitialized(): bool
+    {
+        return $this->hasPloiConfiguration() && ! $this->option('force');
+    }
+
+    protected function selectServer(): array
+    {
+        if ($this->ploi->getServerList()['data'] === null) {
+            $this->errorLine('No servers found! Please create a server first.');
+            exit(1);
+        }
+
+        $servers = collect($this->ploi->getServerList()['data'])->pluck('name', 'id')->toArray();
+        $serverId = select('Select a server:', $servers);
+
+        return ['id' => $serverId, 'name' => $servers[$serverId]];
+    }
+
+    protected function createNewSite($serverId): array
+    {
+        try {
+            $rootDomain = text(
+                label: 'What should the domain for your new site be?',
+                required: true,
+                validate: fn (string $value) => match (true) {
+                    strlen($value) <= 0 => 'Domain cannot be empty.',
+                    strlen($value) > 100 => 'Domain must be less than 100 characters.',
+                    ! preg_match('/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/', $value) => 'Domain must be a valid format (e.g., example.com).',
+                    default => null,
+                },
+                hint: 'Note: Without http(s)://'
+            );
+
+            $webDirectory = text(
+                label: 'Which directory should be the web directory?',
+                default: '/public',
+                required: true,
+                validate: fn (string $value) => match (true) {
+                    strlen($value) <= 0 => 'Web directory cannot be empty.',
+                    $value[0] !== '/' => 'Web directory must start with a forward slash (/).',
+                    ! preg_match('/^[a-zA-Z0-9\/]*$/', $value) => 'Web directory can only contain letters, numbers, and forward slashes.',
+                    strlen($value) >= 50 => 'Web directory must be less than 50 characters.',
+                    default => null,
+                }
+            );
+
+            $systemUser = text(
+                label: 'Which system user should run the site?',
+                default: 'ploi',
+                required: true
+            );
+
+            if ($systemUser !== 'ploi') {
+
+                $sysUserSudo = confirm('Should the system user have sudo privileges?', false);
+
+                spin(
+                    callback: fn () => $this->ploi->createServerUser($serverId, [
+                        'name' => $systemUser,
+                        'sudo' => $sysUserSudo,
+                    ]),
+                    message: 'Creating new system user...'
+                );
+
+                $this->successLine('System user created successfully!');
+            }
+
+            $projectType = select('What type of project is this?', [
+                '' => 'None (Static HTML or PHP)',
+                'laravel' => 'Laravel',
+                'nodejs' => 'NodeJS',
+                'statamic' => 'Statamic',
+                'craft-cms' => 'Craft CMS',
+                'symfony' => 'Symfony',
+                'wordpress' => 'WordPress',
+                'octobercms' => 'OctoberCMS',
+                'cakephp' => 'CakePHP 3',
+            ]);
+
+            $website = spin(
+                callback: fn () => $this->ploi->createSite($serverId, [
+                    'root_domain' => $rootDomain,
+                    'web_directory' => $webDirectory,
+                    'system_user' => $systemUser,
+                    'project_type' => $projectType,
+                ])['data']['id'],
+                message: 'Creating new site...'
+            );
+
+            $this->successLine('Site created successfully!');
+
+            return [
+                'id' => $website,
+                'domain' => $rootDomain,
+            ];
+        } catch (Exception $e) {
+            $this->errorLine('An error occurred! '.$e->getMessage());
+            exit(1);
+        }
+    }
+
+    protected function linkProject(bool $createNewSite, string $domain): void
+    {
+        if (! $createNewSite) {
+            $this->info("Your project is linked to {$domain}!");
+            exit(0);
+        }
+    }
+
+    protected function selectExistingSite(int $serverId): array
+    {
+        $sites = collect($this->ploi->getSiteList($serverId)['data'])->pluck('domain', 'id')->toArray();
+        $siteData = select('On which site you want to install the repository?', $sites);
+
+        return ['id' => $siteData, 'domain' => $sites[$siteData]];
+    }
+}
