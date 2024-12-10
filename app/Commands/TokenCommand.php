@@ -18,13 +18,13 @@ class TokenCommand extends Command
     {
 
         if ($this->hasToken() && ! $this->option('force')) {
-            $this->warnLine('You already have set a token! Use "--force" to override it.');
+            $this->warn('You already have set a token! Use "--force" to override it.');
 
             return;
         }
 
-        $this->infoLine('Welcome to Ploi.io CLI!');
-        $this->infoLine('Please enter your Ploi.io API token to get started.');
+        $this->info('Welcome to Ploi.io CLI!');
+        $this->info('Please enter your Ploi.io API token to get started.');
 
         if ($token = $this->option('token')) {
             $this->saveToken($token);
@@ -65,7 +65,7 @@ class TokenCommand extends Command
 
         config(['ploi.token' => $token]);
 
-        $this->infoLine('Token saved successfully.');
+        $this->info('Token saved successfully.');
     }
 
     private function checkToken(): void
@@ -77,12 +77,12 @@ class TokenCommand extends Command
         $response = $this->ploi->checkUser();
 
         if (! $response) {
-            $this->errorLine('Invalid token. Please try again.');
+            $this->error('Invalid token. Please try again.');
 
             return;
         }
 
         $user = $response['data'];
-        $this->successLine('Connected as: '.$user['name'].' ('.$user['email'].')');
+        $this->success('Connected as: '.$user['name'].' ('.$user['email'].')');
     }
 }

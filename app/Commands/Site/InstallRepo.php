@@ -38,7 +38,7 @@ class InstallRepo extends BaseCommand
         if (! $this->hasRepoInstalled($serverId, $siteDetails['id'])) {
             $this->initializeRepository($serverId, $siteDetails, $siteDetails['domain']);
         } else {
-            $this->warnLine('This site already has a repository installed!');
+            $this->warn('This site already has a repository installed!');
         }
 
     }
@@ -46,7 +46,7 @@ class InstallRepo extends BaseCommand
     protected function selectServer(): int|string
     {
         if ($this->ploi->getServerList()['data'] === null) {
-            $this->errorLine('No servers found! Please create a server first.');
+            $this->error('No servers found! Please create a server first.');
             exit(1);
         }
 
@@ -80,7 +80,7 @@ class InstallRepo extends BaseCommand
             'branch' => $branch,
             'name' => $repoUrl,
         ])) {
-            $this->errorLine('An error occurred while installing the repository! Please check your repository, provider and permissions and try again.');
+            $this->error('An error occurred while installing the repository! Please check your repository, provider and permissions and try again.');
             exit(1);
         }
 
@@ -91,7 +91,7 @@ class InstallRepo extends BaseCommand
 
     protected function getProvider(): string
     {
-        $this->warnLine('Make sure that you have connected the provider to your Ploi.io account!');
+        $this->warn('Make sure that you have connected the provider to your Ploi.io account!');
 
         return select('Which provider do you use?', ['github', 'gitlab', 'bitbucket', 'custom']);
     }
@@ -116,14 +116,14 @@ class InstallRepo extends BaseCommand
             exec('git remote get-url origin 2>&1', $output, $returnVar);
 
             if ($returnVar !== 0) {
-                $this->warnLine('This directory is not a git repository!');
+                $this->warn('This directory is not a git repository!');
 
                 return false;
             }
 
             return implode("\n", $output);
         } catch (Exception $e) {
-            $this->errorLine('An unexpected error occurred: '.$e->getMessage());
+            $this->error('An unexpected error occurred: '.$e->getMessage());
 
             return false;
         }

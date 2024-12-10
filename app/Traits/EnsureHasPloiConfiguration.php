@@ -7,7 +7,7 @@ trait EnsureHasPloiConfiguration
     public function ensureHasPloiConfiguration()
     {
         if (! $this->hasPloiConfiguration()) {
-            $this->errorLine('You have not yet linked this project to Ploi.');
+            $this->errorLine('You have not yet linked this project to Ploi. Please run `ploi init` first.');
             exit(1);
         }
 

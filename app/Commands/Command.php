@@ -2,7 +2,6 @@
 
 namespace App\Commands;
 
-//use App\Services\PloiConfig as PloiConfig;
 use App\Services\PloiAPI;
 use App\Support\Configuration;
 use LaravelZero\Framework\Commands\Command as BaseCommand;
@@ -21,23 +20,28 @@ abstract class Command extends BaseCommand
         $this->configuration = new Configuration;
     }
 
-    public function infoLine($message): void
+    public function console($string, $type, $verbosity = null): void
     {
-        $this->info("<fg=blue>==></><options=bold>{$message}</>");
+        $this->$type($string, $verbosity);
     }
 
-    public function errorLine($message): void
+    public function info($string, $verbosity = null): void
     {
-        $this->error("<fg=red>==></><options=bold>{$message}</>");
+        parent::info("<fg=blue>==></><options=bold> {$string}</>", $verbosity);
     }
 
-    public function successLine($message): void
+    public function error($string, $verbosity = null): void
     {
-        $this->info("<fg=green>==></><options=bold>{$message}</>");
+        parent::error("<fg=red>==></><options=bold> {$string}</>", $verbosity);
     }
 
-    public function warnLine($message): void
+    public function success($string, $verbosity = null): void
     {
-        $this->warn("<fg=yellow>==></><options=bold>{$message}</>");
+        parent::info("<fg=green>==></><options=bold> {$string}</>", $verbosity);
+    }
+
+    public function warn($string, $verbosity = null): void
+    {
+        parent::warn("<fg=yellow>==></><options=bold> {$string}</>", $verbosity);
     }
 }

@@ -128,6 +128,16 @@ class PloiAPI
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/test-domain');
     }
 
+    public function deploySite($serverId, $siteId, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/deploy', $data);
+    }
+
+    public function deployToProduction($serverId, $siteId)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/deploy-to-production');
+    }
+
     /**
      * User Methods
      */

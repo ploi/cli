@@ -24,7 +24,7 @@ class InitCommand extends Command
         $this->ensureHasToken();
 
         if ($this->isAlreadyInitialized()) {
-            $this->errorLine('This site is already initialized! Use --force to reinitialize.');
+            $this->error('This site is already initialized! Use --force to reinitialize.');
             exit(1);
         }
 
@@ -54,7 +54,7 @@ class InitCommand extends Command
     protected function selectServer(): array
     {
         if ($this->ploi->getServerList()['data'] === null) {
-            $this->errorLine('No servers found! Please create a server first.');
+            $this->error('No servers found! Please create a server first.');
             exit(1);
         }
 
@@ -110,7 +110,7 @@ class InitCommand extends Command
                     message: 'Creating new system user...'
                 );
 
-                $this->successLine('System user created successfully!');
+                $this->success('System user created successfully!');
             }
 
             $projectType = select('What type of project is this?', [
@@ -135,14 +135,14 @@ class InitCommand extends Command
                 message: 'Creating new site...'
             );
 
-            $this->successLine('Site created successfully!');
+            $this->success('Site created successfully!');
 
             return [
                 'id' => $website,
                 'domain' => $rootDomain,
             ];
         } catch (Exception $e) {
-            $this->errorLine('An error occurred! '.$e->getMessage());
+            $this->error('An error occurred! '.$e->getMessage());
             exit(1);
         }
     }
