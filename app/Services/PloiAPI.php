@@ -28,6 +28,10 @@ class PloiAPI
             ->withHeaders(['User-Agent' => 'Ploi CLI'])
             ->$method($url, $data);
 
+        if ($response->status() === 404) {
+            return die('Resource not found.');
+        }
+
         if ($response->failed()) {
             return $response;
         }

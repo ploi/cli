@@ -40,8 +40,9 @@ class InitCommand extends Command
 
         $this->linkProject($createNewSite, $siteDetails['domain']);
 
-        if (confirm('Do you want to initialize the repository?')) {
-            $this->call('install:repo --server='.$server['id'].' --site='.$siteDetails['id']);
+        $installRepo = confirm('Do you want to initialize the repository?');
+        if ($installRepo) {
+            $this->call('install:repo', ['--server' => $server['id'], '--site' => $siteDetails['id']]);
         }
 
     }
@@ -151,7 +152,6 @@ class InitCommand extends Command
     {
         if (! $createNewSite) {
             $this->info("Your project is linked to {$domain}!");
-            exit(0);
         }
     }
 

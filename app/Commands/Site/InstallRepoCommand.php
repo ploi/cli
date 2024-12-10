@@ -32,7 +32,7 @@ class InstallRepoCommand extends BaseCommand
             $serverId = $this->selectServer();
             $siteDetails = $this->selectSite($serverId);
         } else {
-            $siteDetails = $this->ploi->getSiteDetails($serverId, $siteId);
+            $siteDetails = $this->ploi->getSiteDetails($serverId, $siteId)['data'];
         }
 
         if (! $this->hasRepoInstalled($serverId, $siteDetails['id'])) {
