@@ -1,71 +1,41 @@
 <?php
 
-namespace App\Commands;
+namespace App\Commands\Site;
 
+use App\Commands\Command;
 use App\Traits\EnsureHasPloiConfiguration;
 use App\Traits\EnsureHasToken;
-use Exception;
-
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\text;
 
-class InitCommand extends Command
+class CreateSiteCommand extends Command
 {
     use EnsureHasPloiConfiguration, EnsureHasToken;
 
-    protected $signature = 'init {--force : Force reinitialization of the configuration}';
+    protected $signature = 'site:create {--server=}';
 
-    protected $description = 'Initialize your site with Ploi.io';
+    protected $description = 'Deploy your site to Ploi.io.';
 
-    public function handle(): void
+    public function handle(): array
     {
         $this->ensureHasToken();
 
-        if ($this->isAlreadyInitialized()) {
-            $this->error('This site is already initialized! Use --force to reinitialize.');
-            exit(1);
+        $serverId = $this->option('server');
+
+        if (! $serverId) {
+            $servers = $this->ploi->getServerList()['data'];
+            $serverId = select(
+                'Select a server:',
+                collect($servers)
+                    ->mapWithKeys(fn ($server) => [
+                        $server['id'] => $server['name'] . ' (' . $server['ip_address'] . ')'
+                    ])
+                    ->toArray()
+            );
         }
 
-        $server = $this->selectServer();
-
-        $createNewSite = confirm("Do you want to create a new site on server <fg=green>[{$server['name']}]</>?", false);
-
-        $siteDetails = $createNewSite
-            ? $this->createNewSite($server['id'])
-            : $this->selectExistingSite($server['id']);
-
-        $this->configuration->initialize($server['id'], $siteDetails['id'], getcwd(), $siteDetails['domain']);
-
-        $this->linkProject($createNewSite, $siteDetails['domain']);
-
-        if (confirm('Do you want to initialize the repository?')) {
-            $this->call('install:repo --server='.$server['id'].' --site='.$siteDetails['id']);
-        }
-
-    }
-
-    protected function isAlreadyInitialized(): bool
-    {
-        return $this->hasPloiConfiguration() && ! $this->option('force');
-    }
-
-    protected function selectServer(): array
-    {
-        if ($this->ploi->getServerList()['data'] === null) {
-            $this->error('No servers found! Please create a server first.');
-            exit(1);
-        }
-
-        $servers = collect($this->ploi->getServerList()['data'])->pluck('name', 'id')->toArray();
-        $serverId = select('Select a server:', $servers);
-
-        return ['id' => $serverId, 'name' => $servers[$serverId]];
-    }
-
-    protected function createNewSite($serverId): array
-    {
         try {
             $rootDomain = text(
                 label: 'What should the domain for your new site be?',
@@ -145,21 +115,7 @@ class InitCommand extends Command
             $this->error('An error occurred! '.$e->getMessage());
             exit(1);
         }
-    }
 
-    protected function linkProject(bool $createNewSite, string $domain): void
-    {
-        if (! $createNewSite) {
-            $this->info("Your project is linked to {$domain}!");
-            exit(0);
-        }
-    }
 
-    protected function selectExistingSite(int $serverId): array
-    {
-        $sites = collect($this->ploi->getSiteList($serverId)['data'])->pluck('domain', 'id')->toArray();
-        $siteData = select('On which site you want to install the repository?', $sites);
-
-        return ['id' => $siteData, 'domain' => $sites[$siteData]];
     }
 }

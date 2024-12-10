@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
-class InstallRepo extends BaseCommand
+class InstallRepoCommand extends BaseCommand
 {
     use EnsureHasPloiConfiguration, EnsureHasToken, HasRepo;
 
