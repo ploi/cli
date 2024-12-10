@@ -35,7 +35,7 @@ class DeployCommand extends Command
                 'Select a server:',
                 collect($servers)
                     ->mapWithKeys(fn ($server) => [
-                        $server['id'] => $server['name'] . ' (' . $server['ip_address'] . ')'
+                        $server['id'] => $server['name'].' ('.$server['ip_address'].')',
                     ])
                     ->toArray()
             );

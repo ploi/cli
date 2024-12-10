@@ -29,7 +29,7 @@ class PloiAPI
             ->$method($url, $data);
 
         if ($response->status() === 404) {
-            return die('Resource not found.');
+            return exit('Resource not found.');
         }
 
         if ($response->failed()) {
@@ -151,6 +151,7 @@ class PloiAPI
     {
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/resume');
     }
+
     /**
      * User Methods
      */

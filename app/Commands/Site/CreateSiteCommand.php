@@ -6,6 +6,7 @@ use App\Commands\Command;
 use App\Traits\EnsureHasPloiConfiguration;
 use App\Traits\EnsureHasToken;
 use Exception;
+
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\spin;
@@ -16,6 +17,7 @@ class CreateSiteCommand extends Command
     use EnsureHasPloiConfiguration, EnsureHasToken;
 
     protected $signature = 'create:site {--server=}';
+
     protected $description = 'Create a site in your server';
 
     public function handle(): array
@@ -29,7 +31,7 @@ class CreateSiteCommand extends Command
                 'Select a server:',
                 collect($servers)
                     ->mapWithKeys(fn ($server) => [
-                        $server['id'] => $server['name'] . ' (' . $server['ip_address'] . ')'
+                        $server['id'] => $server['name'].' ('.$server['ip_address'].')',
                     ])
                     ->toArray()
             );
@@ -114,7 +116,6 @@ class CreateSiteCommand extends Command
             $this->error('An error occurred! '.$e->getMessage());
             exit(1);
         }
-
 
     }
 }

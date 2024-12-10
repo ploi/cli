@@ -6,9 +6,8 @@ use App\Commands\Command as BaseCommand;
 use App\Traits\EnsureHasPloiConfiguration;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasRepo;
-use function Laravel\Prompts\confirm;
+
 use function Laravel\Prompts\select;
-use function Laravel\Prompts\text;
 
 class ResumeSiteCommand extends BaseCommand
 {
@@ -35,7 +34,7 @@ class ResumeSiteCommand extends BaseCommand
         }
 
         $this->ploi->resumeSite($serverId, $this->site['id']);
-        $this->info("{$this->site["domain"]} has been resumed!");
+        $this->info("{$this->site['domain']} has been resumed!");
     }
 
     protected function selectServer(): int|string
@@ -59,5 +58,4 @@ class ResumeSiteCommand extends BaseCommand
 
         return ['id' => $siteId, 'domain' => $sites[$siteId]];
     }
-
 }
