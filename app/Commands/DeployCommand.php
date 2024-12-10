@@ -30,7 +30,15 @@ class DeployCommand extends Command
 
         if (! $this->hasPloiConfiguration()) {
             $servers = $this->ploi->getServerList()['data'];
-            $serverId = select('Select a server:', collect($servers)->pluck('name', 'id')->toArray());
+
+            $serverId = select(
+                'Select a server:',
+                collect($servers)
+                    ->mapWithKeys(fn ($server) => [
+                        $server['id'] => $server['name'] . ' (' . $server['ip_address'] . ')'
+                    ])
+                    ->toArray()
+            );
 
             $sites = $this->ploi->getSiteList($serverId)['data'];
             $siteId = select('Select a site:', collect($sites)->pluck('domain', 'id')->toArray());
