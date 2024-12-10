@@ -142,6 +142,15 @@ class PloiAPI
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/deploy-to-production');
     }
 
+    public function suspendSite($serverId, $siteId, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/suspend', $data);
+    }
+
+    public function resumeSite($serverId, $siteId)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/resume');
+    }
     /**
      * User Methods
      */

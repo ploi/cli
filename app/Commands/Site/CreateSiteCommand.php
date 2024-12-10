@@ -16,8 +16,7 @@ class CreateSiteCommand extends Command
     use EnsureHasPloiConfiguration, EnsureHasToken;
 
     protected $signature = 'create:site {--server=}';
-
-    protected $description = 'Deploy your site to Ploi.io.';
+    protected $description = 'Create a site in your server';
 
     public function handle(): array
     {
