@@ -5,6 +5,7 @@ namespace App\Commands\Site;
 use App\Commands\Command;
 use App\Traits\EnsureHasPloiConfiguration;
 use App\Traits\EnsureHasToken;
+use Exception;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\spin;
@@ -14,7 +15,7 @@ class CreateSiteCommand extends Command
 {
     use EnsureHasPloiConfiguration, EnsureHasToken;
 
-    protected $signature = 'site:create {--server=}';
+    protected $signature = 'create:site {--server=}';
 
     protected $description = 'Deploy your site to Ploi.io.';
 
@@ -23,7 +24,6 @@ class CreateSiteCommand extends Command
         $this->ensureHasToken();
 
         $serverId = $this->option('server');
-
         if (! $serverId) {
             $servers = $this->ploi->getServerList()['data'];
             $serverId = select(
