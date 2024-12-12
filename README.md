@@ -4,7 +4,6 @@
 An easy-to-use command line interface for [ploi](https://ploi.io/register).
 
 ## Documentation
-
 You can see the full documentation on its [website](https://cli.ploi.io).
 
 ### Security
@@ -20,3 +19,14 @@ If you discover any security related issues, please email security@ploi.io inste
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+
+## TODO
+- [x] Add SSH command
+- [ ] Add database commands
+- [ ] Add cronjob commands
+- [ ] Add system user commands
+- [ ] Add system services commands
+- [ ] Add support for WordPress CLI
+- [ ] Add PHP support
+- [ ] Add insights support
+- [ ] Add monitoring support

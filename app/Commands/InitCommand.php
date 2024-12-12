@@ -2,8 +2,8 @@
 
 namespace App\Commands;
 
-use App\Traits\EnsureHasPloiConfiguration;
 use App\Traits\EnsureHasToken;
+use App\Traits\HasPloiConfiguration;
 use Exception;
 
 use function Laravel\Prompts\confirm;
@@ -13,7 +13,7 @@ use function Laravel\Prompts\text;
 
 class InitCommand extends Command
 {
-    use EnsureHasPloiConfiguration, EnsureHasToken;
+    use EnsureHasToken, HasPloiConfiguration;
 
     protected $signature = 'init {--force : Force reinitialization of the configuration}';
 

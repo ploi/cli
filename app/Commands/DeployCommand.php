@@ -2,8 +2,8 @@
 
 namespace App\Commands;
 
-use App\Traits\EnsureHasPloiConfiguration;
 use App\Traits\EnsureHasToken;
+use App\Traits\HasPloiConfiguration;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\select;
@@ -12,7 +12,7 @@ use function Laravel\Prompts\text;
 
 class DeployCommand extends Command
 {
-    use EnsureHasPloiConfiguration, EnsureHasToken;
+    use EnsureHasToken, HasPloiConfiguration;
 
     protected $signature = 'deploy {site?} {--scheduled}';
 

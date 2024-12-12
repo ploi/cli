@@ -3,8 +3,8 @@
 namespace App\Commands\Site;
 
 use App\Commands\Command;
-use App\Traits\EnsureHasPloiConfiguration;
 use App\Traits\EnsureHasToken;
+use App\Traits\HasPloiConfiguration;
 use Exception;
 
 use function Laravel\Prompts\confirm;
@@ -14,7 +14,7 @@ use function Laravel\Prompts\text;
 
 class CreateSiteCommand extends Command
 {
-    use EnsureHasPloiConfiguration, EnsureHasToken;
+    use EnsureHasToken, HasPloiConfiguration;
 
     protected $signature = 'create:site {--server=}';
 

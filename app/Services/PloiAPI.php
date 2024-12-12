@@ -22,11 +22,20 @@ class PloiAPI
         $this->apiKey = $apiKey;
     }
 
-    public function makeRequest($method, $url, $data = [], $page = 1)
+    public function makeRequest($method, $url, $data = [], $page = 1, $search = null)
     {
-        $response = Http::withToken($this->apiKey)
-            ->withHeaders(['User-Agent' => 'Ploi CLI'])
-            ->$method($url, $data);
+        $queryParams = ['page' => $page];
+        if (! is_null($search)) {
+            $queryParams['search'] = $search;
+        }
+        $url .= '?'.http_build_query($queryParams);
+
+        $request = Http::withToken($this->apiKey)
+            ->withHeaders(['User-Agent' => 'Ploi CLI']);
+
+        $response = $method === 'post'
+            ? $request->$method($url, $data)
+            : $request->$method($url);
 
         if ($response->status() === 404) {
             return exit('Resource not found.');
@@ -43,12 +52,12 @@ class PloiAPI
             $currentPage = $pagination['current_page'];
 
             if ($currentPage < $totalPages) {
-                $nextPageUrl = $url.'?page='.($currentPage + 1);
+                $nextPageUrl = $url.'&page='.($currentPage + 1);
                 $responseData['next_page_url'] = $nextPageUrl;
             }
 
             if ($currentPage > 1) {
-                $prevPageUrl = $url.'?page='.($currentPage - 1);
+                $prevPageUrl = $url.'&page='.($currentPage - 1);
                 $responseData['prev_page_url'] = $prevPageUrl;
             }
         }
@@ -59,9 +68,9 @@ class PloiAPI
     /**
      * Server Methods
      */
-    public function getServerList($page = 1)
+    public function getServerList($page = 1, $search = null)
     {
-        return $this->makeRequest('get', $this->apiUrl.'/servers', [], $page);
+        return $this->makeRequest('get', $this->apiUrl.'/servers', page: $page, search: $search);
     }
 
     public function createServer($data)
@@ -69,9 +78,9 @@ class PloiAPI
         return $this->makeRequest('post', $this->apiUrl.'/servers', $data);
     }
 
-    public function getServerDetails($serverId)
+    public function getServerDetails($serverId, $page = 1)
     {
-        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId);
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId, [], $page);
     }
 
     public function updateServer($serverId, $data)
@@ -89,12 +98,22 @@ class PloiAPI
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/system-users', $data);
     }
 
+    public function restartServer($serverId)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/restart');
+    }
+
+    public function restartService($serverId, $service)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/services/'.$service.'/restart');
+    }
+
     /**
      * Site Methods
      */
-    public function getSiteList($serverId, $page = 1)
+    public function getSiteList($serverId, $page = 1, $search = null)
     {
-        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/sites', [], $page);
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/sites', [], $page, $search);
     }
 
     public function createSite($serverId, $data)

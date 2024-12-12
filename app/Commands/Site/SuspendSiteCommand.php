@@ -3,18 +3,16 @@
 namespace App\Commands\Site;
 
 use App\Commands\Command as BaseCommand;
-use App\Traits\EnsureHasPloiConfiguration;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasRepo;
-use Exception;
-use Illuminate\Support\Str;
+
+use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
-use function Laravel\Prompts\confirm;
 
 class SuspendSiteCommand extends BaseCommand
 {
-    use EnsureHasPloiConfiguration, EnsureHasToken, HasRepo;
+    use EnsureHasToken, HasRepo;
 
     protected $signature = 'suspend:site {--server=} {--site=} {reason?}';
 
@@ -25,7 +23,6 @@ class SuspendSiteCommand extends BaseCommand
     public function handle(): void
     {
         $this->ensureHasToken();
-        $this->ensureHasPloiConfiguration();
 
         $serverId = $this->option('server');
         $siteId = $this->option('site');
@@ -36,12 +33,12 @@ class SuspendSiteCommand extends BaseCommand
             $this->site = $this->ploi->getSiteDetails($serverId, $siteId)['data'];
         }
 
-        if($this->site['status'] === 'suspended') {
-            $this->warn("{$this->site["domain"]} is already suspended!");
+        if ($this->site['status'] === 'suspended') {
+            $this->warn("{$this->site['domain']} is already suspended!");
             $resume = confirm('Do you want to unsuspend it?');
-            if($resume) {
+            if ($resume) {
                 $this->ploi->resumeSite($serverId, $this->site['id']);
-                $this->info("{$this->site["domain"]} has been resumed!");
+                $this->info("{$this->site['domain']} has been resumed!");
             }
             exit(1);
         }
@@ -52,7 +49,7 @@ class SuspendSiteCommand extends BaseCommand
         );
 
         $this->ploi->suspendSite($serverId, $this->site['id'], ['reason' => $reason]);
-        $this->info("{$this->site["domain"]} has been suspended!");
+        $this->info("{$this->site['domain']} has been suspended!");
 
     }
 
@@ -77,5 +74,4 @@ class SuspendSiteCommand extends BaseCommand
 
         return ['id' => $siteId, 'domain' => $sites[$siteId]];
     }
-
 }

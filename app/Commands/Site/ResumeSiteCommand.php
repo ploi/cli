@@ -3,7 +3,6 @@
 namespace App\Commands\Site;
 
 use App\Commands\Command as BaseCommand;
-use App\Traits\EnsureHasPloiConfiguration;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasRepo;
 
@@ -11,7 +10,7 @@ use function Laravel\Prompts\select;
 
 class ResumeSiteCommand extends BaseCommand
 {
-    use EnsureHasPloiConfiguration, EnsureHasToken, HasRepo;
+    use EnsureHasToken, HasRepo;
 
     protected $signature = 'resume:site {--server=} {--site=}';
 
@@ -22,7 +21,6 @@ class ResumeSiteCommand extends BaseCommand
     public function handle(): void
     {
         $this->ensureHasToken();
-        $this->ensureHasPloiConfiguration();
 
         $serverId = $this->option('server');
         $siteId = $this->option('site');

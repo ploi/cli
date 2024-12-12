@@ -3,8 +3,8 @@
 namespace App\Commands\Site;
 
 use App\Commands\Command as BaseCommand;
-use App\Traits\EnsureHasPloiConfiguration;
 use App\Traits\EnsureHasToken;
+use App\Traits\HasPloiConfiguration;
 use App\Traits\HasRepo;
 use Exception;
 use Illuminate\Support\Str;
@@ -14,7 +14,7 @@ use function Laravel\Prompts\text;
 
 class InstallRepoCommand extends BaseCommand
 {
-    use EnsureHasPloiConfiguration, EnsureHasToken, HasRepo;
+    use EnsureHasToken, HasPloiConfiguration, HasRepo;
 
     protected $signature = 'install:repo {--server=} {--site=}';
 
@@ -23,7 +23,6 @@ class InstallRepoCommand extends BaseCommand
     public function handle(): void
     {
         $this->ensureHasToken();
-        $this->ensureHasPloiConfiguration();
 
         $serverId = $this->option('server');
         $siteId = $this->option('site');
