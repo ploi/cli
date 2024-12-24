@@ -17,7 +17,13 @@ class CreateSiteCommand extends Command
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer;
 
-    protected $signature = 'create:site {--server=}';
+    protected $signature = 'create:site 
+                            {--server= : The server ID to create the site on} 
+                            {--domain= : The domain for the new site} 
+                            {--web-directory= : The web directory for the site (default: /public)} 
+                            {--system-user= : The system user to run the site (default: ploi)} 
+                            {--sudo : Whether the system user should have sudo privileges (applicable only if system-user is not "ploi")} 
+                            {--project-type= : The type of project (e.g., laravel, nodejs, etc.)}';
 
     protected $description = 'Create a site in your server';
 
@@ -28,7 +34,7 @@ class CreateSiteCommand extends Command
         $serverId = $this->getServerId();
 
         try {
-            $rootDomain = text(
+            $rootDomain = $this->option('domain') ?? text(
                 label: 'What should the domain for your new site be?',
                 required: true,
                 validate: fn (string $value) => match (true) {
@@ -40,7 +46,7 @@ class CreateSiteCommand extends Command
                 hint: 'Note: Without http(s)://'
             );
 
-            $webDirectory = text(
+            $webDirectory = $this->option('web-directory') ?? text(
                 label: 'Which directory should be the web directory?',
                 default: '/public',
                 required: true,
@@ -53,14 +59,14 @@ class CreateSiteCommand extends Command
                 }
             );
 
-            $systemUser = text(
+            $systemUser = $this->option('system-user') ?? text(
                 label: 'Which system user should run the site?',
                 default: 'ploi',
                 required: true
             );
 
             if ($systemUser !== 'ploi') {
-                $sysUserSudo = confirm('Should the system user have sudo privileges?', false);
+                $sysUserSudo = $this->option('sudo') ?? confirm('Should the system user have sudo privileges?', false);
 
                 spin(
                     callback: fn () => $this->ploi->createServerUser($serverId, [
@@ -73,7 +79,7 @@ class CreateSiteCommand extends Command
                 $this->success('System user created successfully!');
             }
 
-            $projectType = select('What type of project is this?', [
+            $projectType = $this->option('project-type') ?? select('What type of project is this?', [
                 '' => 'None (Static HTML or PHP)',
                 'laravel' => 'Laravel',
                 'nodejs' => 'NodeJS',
