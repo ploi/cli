@@ -9,13 +9,12 @@ use App\Traits\HasPloiConfiguration;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\spin;
-use function Laravel\Prompts\text;
 
 class DeployCommand extends Command
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 
-    protected $signature = 'deploy {--server=} {--site=} {--scheduled}';
+    protected $signature = 'deploy {--server=} {--site=} {--schedule=}';
 
     protected $description = 'Deploy your site to Ploi.io.';
 
@@ -29,6 +28,7 @@ class DeployCommand extends Command
         $this->site = $this->ploi->getSiteDetails($serverId, $siteId)['data'];
 
         $data = [];
+        $isScheduled = false;
 
         if ($this->ploi->getSiteDetails($serverId, $siteId)['data']['has_staging']) {
             $this->warn("{$this->site['domain']} has a staging environment.");
@@ -44,30 +44,34 @@ class DeployCommand extends Command
             }
         }
 
-        if ($this->option('scheduled')) {
-            $scheduledDatetime = text(
-                label: 'Please enter the date and time for the deployment:',
-                required: true,
-                validate: fn (string $value) => match (true) {
-                    ! preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}$/', $value) => 'Please enter a valid date and time.',
-                    strtotime($value) < time() => 'Please enter a date and time in the future.',
-                    default => null,
-                },
-                hint: 'A date in the following format: 2023-01-01 10:00 in your own timezone.'
-            );
-            $this->success("Scheduled deployment for {$this->site['domain']} at {$scheduledDatetime}.");
+        $scheduleDatetime = $this->option('schedule');
 
-            $data['scheduled'] = $scheduledDatetime;
+        if ($scheduleDatetime) {
+            $this->validateScheduleDatetime($scheduleDatetime);
+            $this->success("Scheduled deployment for {$this->site['domain']} at {$scheduleDatetime}.");
+            $data['schedule'] = $scheduleDatetime;
+            $isScheduled = true;
         }
 
-        $this->deploy($serverId, $siteId, $this->site['domain'], $data);
+        $this->deploy($serverId, $siteId, $this->site['domain'], $data, $isScheduled);
     }
 
-    protected function deploy($serverId, $siteId, $domain, $data, $deployToProduction = false): void
+    protected function validateScheduleDatetime(string $datetime): void
     {
-        $deploying = $deployToProduction
-            ? $this->ploi->deployToProduction($serverId, $siteId)
-            : $this->ploi->deploySite($serverId, $siteId, $data);
+        if (! preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}$/', $datetime)) {
+            $this->error('Please provide a valid datetime in the format: YYYY-MM-DD HH:MM.');
+            exit(1);
+        }
+
+        if (strtotime($datetime) < time()) {
+            $this->error('The datetime must be in the future.');
+            exit(1);
+        }
+    }
+
+    protected function deploy($serverId, $siteId, $domain, $data, $isScheduled = false): void
+    {
+        $deploying = $this->ploi->deploySite($serverId, $siteId, $data);
 
         if (! isset($deploying['message'])) {
             $this->error($deploying['error']);
@@ -75,6 +79,10 @@ class DeployCommand extends Command
         }
 
         $this->info($deploying['message']);
+
+        if ($isScheduled) {
+            return;
+        }
 
         $statusChecked = spin(
             callback: function () use ($serverId, $siteId, $domain) {
