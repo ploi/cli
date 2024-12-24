@@ -25,7 +25,6 @@ class InitCommand extends Command
 
     protected array $site = [];
 
-
     public function handle(): void
     {
         $this->ensureHasToken();
@@ -37,7 +36,6 @@ class InitCommand extends Command
 
         $server = $this->selectServer();
         $serverId = $this->getServerIdByNameOrIp($server);
-
 
         $createNewSite = confirm("Do you want to create a new site on server <fg=green>[{$server}]</>?", false);
 

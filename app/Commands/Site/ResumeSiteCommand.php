@@ -3,14 +3,13 @@
 namespace App\Commands\Site;
 
 use App\Commands\Command as BaseCommand;
+use App\Commands\Concerns\InteractWithServer;
+use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
-use App\Traits\HasRepo;
-
-use function Laravel\Prompts\select;
 
 class ResumeSiteCommand extends BaseCommand
 {
-    use EnsureHasToken, HasRepo;
+    use EnsureHasToken, InteractWithServer, InteractWithSite;
 
     protected $signature = 'resume:site {--server=} {--site=}';
 
@@ -22,38 +21,10 @@ class ResumeSiteCommand extends BaseCommand
     {
         $this->ensureHasToken();
 
-        $serverId = $this->option('server');
-        $siteId = $this->option('site');
-
-        if (! $serverId || ! $siteId) {
-            $serverId = $this->selectServer();
-        } else {
-            $this->site = $this->ploi->getSiteDetails($serverId, $siteId)['data'];
-        }
+        [$serverId, $siteId] = $this->getServerAndSite();
+        $this->site = $this->ploi->getSiteDetails($serverId, $siteId)['data'];
 
         $this->ploi->resumeSite($serverId, $this->site['id']);
         $this->info("{$this->site['domain']} has been resumed!");
-    }
-
-    protected function selectServer(): int|string
-    {
-        if ($this->ploi->getServerList()['data'] === null) {
-            $this->error('No servers found! Please create a server first.');
-            exit(1);
-        }
-
-        $servers = collect($this->ploi->getServerList()['data'])->pluck('name', 'id')->toArray();
-
-        return select('Select a server:', $servers);
-    }
-
-    protected function selectSite($serverId): array
-    {
-        $sites = collect($this->ploi->getSiteList($serverId)['data'])->pluck('domain', 'id')->toArray();
-        $siteId = select('On which site you want to install the repository?', $sites);
-
-        $this->site = $this->ploi->getSiteDetails($serverId, $siteId)['data'];
-
-        return ['id' => $siteId, 'domain' => $sites[$siteId]];
     }
 }
