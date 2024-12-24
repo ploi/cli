@@ -3,6 +3,7 @@
 namespace App\Commands\Site;
 
 use App\Commands\Command;
+use App\Commands\Concerns\InteractWithServer;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
 use Exception;
@@ -14,7 +15,7 @@ use function Laravel\Prompts\text;
 
 class CreateSiteCommand extends Command
 {
-    use EnsureHasToken, HasPloiConfiguration;
+    use EnsureHasToken, HasPloiConfiguration, InteractWithServer;
 
     protected $signature = 'create:site {--server=}';
 
@@ -24,18 +25,7 @@ class CreateSiteCommand extends Command
     {
         $this->ensureHasToken();
 
-        $serverId = $this->option('server');
-        if (! $serverId) {
-            $servers = $this->ploi->getServerList()['data'];
-            $serverId = select(
-                'Select a server:',
-                collect($servers)
-                    ->mapWithKeys(fn ($server) => [
-                        $server['id'] => $server['name'].' ('.$server['ip_address'].')',
-                    ])
-                    ->toArray()
-            );
-        }
+        $serverId = $this->getServerId();
 
         try {
             $rootDomain = text(
@@ -70,7 +60,6 @@ class CreateSiteCommand extends Command
             );
 
             if ($systemUser !== 'ploi') {
-
                 $sysUserSudo = confirm('Should the system user have sudo privileges?', false);
 
                 spin(
@@ -113,9 +102,8 @@ class CreateSiteCommand extends Command
                 'domain' => $rootDomain,
             ];
         } catch (Exception $e) {
-            $this->error('An error occurred! '.$e->getMessage());
+            $this->error('An error occurred! ' . $e->getMessage());
             exit(1);
         }
-
     }
 }

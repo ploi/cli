@@ -25,6 +25,17 @@ trait InteractWithServer
         );
     }
 
+    protected function getServerId(): int
+    {
+        if ($this->hasPloiConfiguration() && ! $this->option('server')) {
+            return $this->configuration->get('server');
+        }
+
+        $serverIdentifier = $this->option('server') ?? $this->selectServer();
+
+        return $this->getServerIdByNameOrIp($serverIdentifier);
+    }
+
     protected function getServerIdByNameOrIp(string $identifier): ?int
     {
         $servers = collect($this->ploi->getServerList()['data']);
