@@ -2,6 +2,8 @@
 
 namespace App\Commands;
 
+use App\Commands\Concerns\InteractWithServer;
+use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
 use Exception;
@@ -13,11 +15,16 @@ use function Laravel\Prompts\text;
 
 class InitCommand extends Command
 {
-    use EnsureHasToken, HasPloiConfiguration;
+    use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 
     protected $signature = 'init {--force : Force reinitialization of the configuration}';
 
     protected $description = 'Initialize your site with Ploi.io';
+
+    protected array $server = [];
+
+    protected array $site = [];
+
 
     public function handle(): void
     {
@@ -29,20 +36,22 @@ class InitCommand extends Command
         }
 
         $server = $this->selectServer();
+        $serverId = $this->getServerIdByNameOrIp($server);
 
-        $createNewSite = confirm("Do you want to create a new site on server <fg=green>[{$server['name']}]</>?", false);
+
+        $createNewSite = confirm("Do you want to create a new site on server <fg=green>[{$server}]</>?", false);
 
         $siteDetails = $createNewSite
-            ? $this->createNewSite($server['id'])
-            : $this->selectExistingSite($server['id']);
+            ? $this->createNewSite($serverId)
+            : $this->selectExistingSite($serverId);
 
-        $this->configuration->initialize($server['id'], $siteDetails['id'], getcwd(), $siteDetails['domain']);
+        $this->configuration->initialize($serverId, $siteDetails['id'], getcwd(), $siteDetails['domain']);
 
         $this->linkProject($createNewSite, $siteDetails['domain']);
 
         $installRepo = confirm('Do you want to initialize the repository?');
         if ($installRepo) {
-            $this->call('install:repo', ['--server' => $server['id'], '--site' => $siteDetails['id']]);
+            $this->call('install:repo', ['--server' => $serverId, '--site' => $siteDetails['id']]);
         }
 
     }
@@ -50,19 +59,6 @@ class InitCommand extends Command
     protected function isAlreadyInitialized(): bool
     {
         return $this->hasPloiConfiguration() && ! $this->option('force');
-    }
-
-    protected function selectServer(): array
-    {
-        if ($this->ploi->getServerList()['data'] === null) {
-            $this->error('No servers found! Please create a server first.');
-            exit(1);
-        }
-
-        $servers = collect($this->ploi->getServerList()['data'])->pluck('name', 'id')->toArray();
-        $serverId = select('Select a server:', $servers);
-
-        return ['id' => $serverId, 'name' => $servers[$serverId]];
     }
 
     protected function createNewSite($serverId): array

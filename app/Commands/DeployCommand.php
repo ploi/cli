@@ -2,59 +2,43 @@
 
 namespace App\Commands;
 
+use App\Commands\Concerns\InteractWithServer;
+use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
 
 use function Laravel\Prompts\confirm;
-use function Laravel\Prompts\select;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\text;
 
 class DeployCommand extends Command
 {
-    use EnsureHasToken, HasPloiConfiguration;
+    use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 
-    protected $signature = 'deploy {site?} {--scheduled}';
+    protected $signature = 'deploy {--server=} {--site=} {--scheduled}';
 
     protected $description = 'Deploy your site to Ploi.io.';
+
+    protected array $site = [];
 
     public function handle(): void
     {
         $this->ensureHasToken();
 
-        $siteId = $this->configuration->get('site');
-        $serverId = $this->configuration->get('server');
-        $domain = $this->configuration->get('domain');
+        [$serverId, $siteId] = $this->getServerAndSite();
+        $this->site = $this->ploi->getSiteDetails($serverId, $siteId)['data'];
 
         $data = [];
 
-        if (! $this->hasPloiConfiguration()) {
-            $servers = $this->ploi->getServerList()['data'];
-
-            $serverId = select(
-                'Select a server:',
-                collect($servers)
-                    ->mapWithKeys(fn ($server) => [
-                        $server['id'] => $server['name'].' ('.$server['ip_address'].')',
-                    ])
-                    ->toArray()
-            );
-
-            $sites = $this->ploi->getSiteList($serverId)['data'];
-            $siteId = select('Select a site:', collect($sites)->pluck('domain', 'id')->toArray());
-        }
-
-        $siteDetails = $this->ploi->getSiteDetails($serverId, $siteId)['data'];
-
-        if ($siteDetails['has_staging']) {
-            $this->warn('This site has a staging environment.');
+        if ($this->ploi->getSiteDetails($serverId, $siteId)['data']['has_staging']) {
+            $this->warn("{$this->site['domain']} has a staging environment.");
             $deployToProduction = confirm(
                 label: 'Do you want to deploy to production? (yes/no)',
                 default: false
             );
 
             if ($deployToProduction) {
-                $this->deploy($serverId, $siteId, $domain, [], true);
+                $this->deploy($serverId, $siteId, $this->site['domain'], [], true);
 
                 return;
             }
@@ -71,12 +55,12 @@ class DeployCommand extends Command
                 },
                 hint: 'A date in the following format: 2023-01-01 10:00 in your own timezone.'
             );
-            $this->success("Scheduled deployment for {$domain} at {$scheduledDatetime}.");
+            $this->success("Scheduled deployment for {$this->site['domain']} at {$scheduledDatetime}.");
 
             $data['scheduled'] = $scheduledDatetime;
         }
 
-        $this->deploy($serverId, $siteId, $domain, $data);
+        $this->deploy($serverId, $siteId, $this->site['domain'], $data);
     }
 
     protected function deploy($serverId, $siteId, $domain, $data, $deployToProduction = false): void
