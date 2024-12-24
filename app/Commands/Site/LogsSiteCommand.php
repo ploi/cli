@@ -5,6 +5,7 @@ namespace App\Commands\Site;
 use App\Commands\Command as BaseCommand;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
+
 use function Laravel\Prompts\select;
 
 class LogsSiteCommand extends BaseCommand
@@ -12,7 +13,9 @@ class LogsSiteCommand extends BaseCommand
     use EnsureHasToken, HasPloiConfiguration;
 
     protected $signature = 'logs:site {logid?} {--server=} {--site=}';
+
     protected $description = 'Get the logs of a site';
+
     protected array $site = [];
 
     public function handle(): void
@@ -40,7 +43,7 @@ class LogsSiteCommand extends BaseCommand
             $siteId = $this->getSiteIdByDomain($serverId, $siteIdentifier);
         }
 
-        if (!$serverId || !$siteId) {
+        if (! $serverId || ! $siteId) {
             $this->error('Server and site must be valid.');
             exit(1);
         }
@@ -52,9 +55,9 @@ class LogsSiteCommand extends BaseCommand
     {
         $servers = collect($this->ploi->getServerList()['data']);
 
-        $server = $servers->first(fn($server) => $server['name'] === $identifier || $server['ip_address'] === $identifier);
+        $server = $servers->first(fn ($server) => $server['name'] === $identifier || $server['ip_address'] === $identifier);
 
-        if (!$server) {
+        if (! $server) {
             $this->error("Server with name or IP '{$identifier}' not found.");
             exit(1);
         }
@@ -66,9 +69,9 @@ class LogsSiteCommand extends BaseCommand
     {
         $sites = collect($this->ploi->getSiteList($serverId)['data']);
 
-        $site = $sites->first(fn($site) => $site['domain'] === $domain);
+        $site = $sites->first(fn ($site) => $site['domain'] === $domain);
 
-        if (!$site) {
+        if (! $site) {
             $this->error("Site with domain '{$domain}' not found on the selected server.");
             exit(1);
         }
@@ -80,7 +83,7 @@ class LogsSiteCommand extends BaseCommand
     {
         $servers = $this->ploi->getServerList()['data'];
 
-        if (!$servers) {
+        if (! $servers) {
             $this->error('No servers found! Please create a server first.');
             exit(1);
         }
@@ -101,7 +104,7 @@ class LogsSiteCommand extends BaseCommand
         $log = $this->ploi->getSiteLog($serverId, $siteId, $logId)['data'];
 
         $this->info("Description: {$log['description']}");
-        $this->info("Type: " . ($log['type'] ?? 'N/A'));
+        $this->info('Type: '.($log['type'] ?? 'N/A'));
         $this->info("Created At: {$log['created_at']}");
         $this->info("Relative Time: {$log['created_at_human']}");
         $this->line("Content: {$log['content']}");
@@ -112,7 +115,7 @@ class LogsSiteCommand extends BaseCommand
         $logs = $this->ploi->getSiteLogs($serverId, $siteId)['data'];
 
         $headers = ['ID', 'Description', 'Type', 'Created At', 'Relative Time'];
-        $rows = collect($logs)->map(fn($log) => [
+        $rows = collect($logs)->map(fn ($log) => [
             $log['id'],
             $log['description'],
             $log['type'] ?? 'N/A',
