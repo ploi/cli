@@ -102,7 +102,7 @@ class CreateSiteCommand extends Command
                 'domain' => $rootDomain,
             ];
         } catch (Exception $e) {
-            $this->error('An error occurred! ' . $e->getMessage());
+            $this->error('An error occurred! '.$e->getMessage());
             exit(1);
         }
     }
