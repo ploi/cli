@@ -108,6 +108,16 @@ class PloiAPI
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/services/'.$service.'/restart');
     }
 
+    public function databaseList($serverId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/databases');
+    }
+
+    public function createDatabase($serverId, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/databases', $data);
+    }
+
     /**
      * Site Methods
      */
