@@ -31,7 +31,7 @@ class DatabaseAcknowledgeCommand extends Command
     {
         $this->ensureHasToken();
 
-        $serverId = $this->option('server') ?? $this->getServerId();
+        $serverId = $this->getServerId();
         $this->server = $this->ploi->getServerDetails($serverId)['data'];
 
         try {
