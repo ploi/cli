@@ -123,6 +123,11 @@ class PloiAPI
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/databases/acknowledge', $data);
     }
 
+    public function forgetDatabase($serverId, $databaseId)
+    {
+        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/databases/'.$databaseId.'/forget');
+    }
+
     /**
      * Site Methods
      */
