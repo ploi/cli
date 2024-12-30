@@ -128,6 +128,11 @@ class PloiAPI
         return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/databases/'.$databaseId.'/forget');
     }
 
+    public function duplicateDatabase($serverId, $databaseId, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/databases/'.$databaseId.'/duplicate', $data);
+    }
+
     /**
      * Site Methods
      */
