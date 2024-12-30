@@ -17,7 +17,7 @@ class DatabaseForgetCommand extends Command
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 
     protected $signature = 'database:forget 
-                            {--server= : The server ID where the database will be acknowledged}
+                            {--server= : The server where the database will be acknowledged}
                             {--database_id= : The ID of the database to forget}}';
 
     protected $description = 'Forget a database that has been removed outside of Ploi';

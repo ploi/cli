@@ -17,7 +17,7 @@ class DatabaseAcknowledgeCommand extends Command
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 
     protected $signature = 'database:acknowledge 
-                            {--server= : The server ID where the database will be acknowledged}
+                            {--server= : The server where the database will be acknowledged}
                             {--name= : The name of the database (alpha-numeric, dashes, underscores, 2-64 characters)}';
 
     protected $description = 'Acknowledge a database';

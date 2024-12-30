@@ -18,7 +18,7 @@ class DatabaseDuplicateCommand extends Command
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 
     protected $signature = 'database:duplicate 
-                            {--server= : The server ID where the database will be duplicated}
+                            {--server= : The server where the database will be duplicated}
                             {--database-id= : The ID of the database to duplicate}
                             {--name= : The name of the new database}
                             {--user= : The user of the new database (optional)}

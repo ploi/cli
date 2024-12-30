@@ -20,7 +20,7 @@ class DatabaseCreateCommand extends Command
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 
     protected $signature = 'database:create 
-                            {--server= : The server ID where the database will be created}
+                            {--server= : The server where the database will be created}
                             {--name= : The name of the database (alpha-numeric, dashes, underscores, 2-64 characters)}
                             {--user= : The database user (optional, alpha-numeric, dashes, underscores, 2-64 characters)}
                             {--password= : The database password (optional)}
