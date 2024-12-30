@@ -41,6 +41,18 @@ class PloiAPI
             return exit('Resource not found.');
         }
 
+        if ($response->status() === 422) {
+            $errors = $response['errors'];
+            $errorMessage = $response['message'].' -> ';
+            foreach ($errors as $field => $messages) {
+                foreach ($messages as $message) {
+                    $errorMessage .= $field.': '.$message.' ';
+                }
+            }
+
+            return exit($errorMessage);
+        }
+
         if ($response->failed()) {
             return $response;
         }
@@ -136,6 +148,11 @@ class PloiAPI
     public function deleteDatabase($serverId, $databaseId)
     {
         return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/databases/'.$databaseId);
+    }
+
+    public function createDatabaseUser($serverId, $databaseId, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/databases/'.$databaseId.'/users', $data);
     }
 
     /**
