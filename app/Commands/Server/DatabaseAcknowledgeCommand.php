@@ -8,10 +8,7 @@ use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
 
-use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
-use function Laravel\Prompts\password;
-use function Laravel\Prompts\select;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\text;
 
