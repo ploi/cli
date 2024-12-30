@@ -118,6 +118,11 @@ class PloiAPI
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/databases', $data);
     }
 
+    public function acknowledgeDatabase($serverId, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/databases/acknowledge', $data);
+    }
+
     /**
      * Site Methods
      */
