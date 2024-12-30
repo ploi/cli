@@ -42,13 +42,12 @@ class PloiAPI
         }
 
         if ($response->status() === 422) {
-            $errors = $response['errors'];
-            $errorMessage = $response['message'].' -> ';
-            foreach ($errors as $field => $messages) {
-                foreach ($messages as $message) {
-                    $errorMessage .= $field.': '.$message.' ';
-                }
+            $errors = $response->json()['errors'];
+            $errorMessage = "\033[31m".' ==> '."\033[0m\033[1;37;40m";
+            foreach ($errors as $error) {
+                $errorMessage .= is_array($error) ? json_encode($error).' ' : $error.' ';
             }
+            $errorMessage .= "\033[0m";
 
             return exit($errorMessage);
         }
