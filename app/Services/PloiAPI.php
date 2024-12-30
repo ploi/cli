@@ -120,6 +120,11 @@ class PloiAPI
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/services/'.$service.'/restart');
     }
 
+    public function refreshOPcache($serverId)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/refresh-opcache');
+    }
+
     public function databaseList($serverId)
     {
         return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/databases');
