@@ -119,6 +119,16 @@ class PloiAPI
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/services/'.$service.'/restart');
     }
 
+    public function enableOPcache($serverId)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/enable-opcache');
+    }
+
+    public function disableOPcache($serverId)
+    {
+        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/disable-opcache');
+    }
+
     public function refreshOPcache($serverId)
     {
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/refresh-opcache');
