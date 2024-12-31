@@ -24,6 +24,7 @@ class PloiAPI
 
     public function makeRequest($method, $url, $data = [], $page = 1, $search = null)
     {
+
         $queryParams = ['page' => $page];
         if (! is_null($search)) {
             $queryParams['search'] = $search;
@@ -33,7 +34,7 @@ class PloiAPI
         $request = Http::withToken($this->apiKey)
             ->withHeaders(['User-Agent' => 'Ploi CLI']);
 
-        $response = $method === 'post'
+        $response = $method === 'post' || $method === 'patch'
             ? $request->$method($url, $data)
             : $request->$method($url);
 
