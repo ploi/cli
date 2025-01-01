@@ -243,6 +243,16 @@ class PloiAPI
         return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/log/'.$logId);
     }
 
+    public function getEnv($serverId, $siteId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/env');
+    }
+
+    public function updateEnv($serverId, $siteId, $data)
+    {
+        return $this->makeRequest('patch', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/env', $data);
+    }
+
     /**
      * User Methods
      */
