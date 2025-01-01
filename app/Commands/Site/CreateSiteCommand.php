@@ -17,7 +17,7 @@ class CreateSiteCommand extends Command
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer;
 
-    protected $signature = 'create:site 
+    protected $signature = 'site:create 
                             {--server= : The server to create the site on} 
                             {--domain= : The domain for the new site} 
                             {--web-directory= : The web directory for the site (default: /public)} 
