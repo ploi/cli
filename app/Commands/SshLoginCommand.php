@@ -27,7 +27,7 @@ class SshLoginCommand extends Command
 
         $this->server = $this->ploi->getServerDetails($serverId)['data'];
 
-        $user = $user ?? text(label: 'Enter the username you want to login with', default: 'ploi');
+        $user = $this->option('user') ?? text(label: 'Enter the username you want to login with', default: 'ploi');
 
         $this->info("Logging in to {$this->server['name']} as {$user}");
 
