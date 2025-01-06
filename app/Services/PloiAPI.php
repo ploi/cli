@@ -39,6 +39,12 @@ class PloiAPI
             }
 
             $responseData = $response->json();
+
+            // Return empty array for successful DELETE requests or empty responses
+            if (empty($responseData) || ($method === 'delete' && $response->successful())) {
+                return ['data' => []];
+            }
+
             $allData = $this->mergeResponseData($allData, $responseData);
 
         } while ($this->hasNextPage($responseData, $currentPage++));
@@ -91,6 +97,10 @@ class PloiAPI
 
     private function mergeResponseData(array $existing, array $new): array
     {
+        if (empty($new)) {
+            return $existing;
+        }
+
         $newData = $new['data'] ?? [$new];
 
         return array_merge($existing, $newData);
@@ -291,6 +301,11 @@ class PloiAPI
     public function createCertificate($serverId, $siteId, $data)
     {
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/certificates', $data);
+    }
+
+    public function deleteCertificate($serverId, $siteId, $certId)
+    {
+        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/certificates/'.$certId);
     }
 
     /**
