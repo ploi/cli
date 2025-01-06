@@ -30,7 +30,7 @@ trait InteractWithSite
     protected function selectSite($serverId): array
     {
         $sites = collect($this->ploi->getSiteList($serverId)['data'])->pluck('domain', 'domain')->toArray();
-        $domain = select('Select a site by domain:', $sites);
+        $domain = select('Select a site by domain:', $sites, scroll: 10);
 
         return ['domain' => $domain];
     }

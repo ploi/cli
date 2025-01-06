@@ -21,7 +21,8 @@ trait InteractWithServer
                 ->mapWithKeys(fn ($server) => [
                     $server['name'] => $server['name'].' ('.$server['ip_address'].')',
                 ])
-                ->toArray()
+                ->toArray(),
+            scroll: 10
         );
     }
 

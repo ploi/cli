@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 
@@ -11,10 +12,13 @@ class PloiAPI
 
     public mixed $apiUrl;
 
+    public mixed $headers;
+
     public function __construct()
     {
         $this->apiKey = config('ploi.token');
         $this->apiUrl = Config::get('ploi.api_url');
+        $this->headers = ['User-Agent' => 'Ploi CLI'];
     }
 
     public function setToken(string $apiKey): void
@@ -22,59 +26,80 @@ class PloiAPI
         $this->apiKey = $apiKey;
     }
 
-    public function makeRequest($method, $url, $data = [], $page = 1, $search = null)
+    public function makeRequest(string $method, string $url, array $data = [], int $page = 1, ?string $search = null): array
     {
+        $allData = [];
+        $currentPage = $page;
 
-        $queryParams = ['page' => $page];
-        if (! is_null($search)) {
-            $queryParams['search'] = $search;
-        }
-        $url .= '?'.http_build_query($queryParams);
+        do {
+            $response = $this->sendRequest($method, $url, $data, $currentPage, $search);
 
-        $request = Http::withToken($this->apiKey)
-            ->withHeaders(['User-Agent' => 'Ploi CLI']);
-
-        $response = $method === 'post' || $method === 'patch'
-            ? $request->$method($url, $data)
-            : $request->$method($url);
-
-        if ($response->status() === 404) {
-            return exit('Resource not found.');
-        }
-
-        if ($response->status() === 422) {
-            $errors = $response->json()['errors'];
-            $errorMessage = "\033[31m".' ==> '."\033[0m\033[1;37;40m";
-            foreach ($errors as $error) {
-                $errorMessage .= is_array($error) ? json_encode($error).' ' : $error.' ';
-            }
-            $errorMessage .= "\033[0m";
-
-            return exit($errorMessage);
-        }
-
-        if ($response->failed()) {
-            return $response;
-        }
-
-        $responseData = $response->json();
-        if (isset($responseData['meta']['pagination'])) {
-            $pagination = $responseData['meta']['pagination'];
-            $totalPages = $pagination['total_pages'];
-            $currentPage = $pagination['current_page'];
-
-            if ($currentPage < $totalPages) {
-                $nextPageUrl = $url.'&page='.($currentPage + 1);
-                $responseData['next_page_url'] = $nextPageUrl;
+            if ($response->failed()) {
+                $this->handleError($response);
             }
 
-            if ($currentPage > 1) {
-                $prevPageUrl = $url.'&page='.($currentPage - 1);
-                $responseData['prev_page_url'] = $prevPageUrl;
-            }
+            $responseData = $response->json();
+            $allData = $this->mergeResponseData($allData, $responseData);
+
+        } while ($this->hasNextPage($responseData, $currentPage++));
+
+        return ['data' => $allData];
+    }
+
+    private function sendRequest(string $method, string $url, array $data, int $page, ?string $search): Response
+    {
+        $currentUrl = $this->buildUrl($url, $page, $search);
+        $request = Http::withToken($this->apiKey)->withHeaders($this->headers);
+
+        return match ($method) {
+            'post', 'patch' => $request->$method($currentUrl, $data),
+            default => $request->$method($currentUrl)
+        };
+    }
+
+    private function buildUrl(string $url, int $page, ?string $search): string
+    {
+        $params = ['page' => $page];
+        if ($search) {
+            $params['search'] = $search;
         }
 
-        return $responseData;
+        return $url.'?'.http_build_query($params);
+    }
+
+    private function handleError(Response $response): void
+    {
+        match ($response->status()) {
+            404 => exit('Resource not found.'),
+            422 => $this->handleValidationError($response),
+            default => $response
+        };
+    }
+
+    private function handleValidationError(Response $response): never
+    {
+        $errors = $response->json()['errors'];
+        $errorMessage = "\033[31m ==> \033[0m\033[1;37;40m";
+
+        foreach ($errors as $error) {
+            $errorMessage .= is_array($error) ? json_encode($error) : $error;
+            $errorMessage .= ' ';
+        }
+
+        exit($errorMessage."\033[0m");
+    }
+
+    private function mergeResponseData(array $existing, array $new): array
+    {
+        $newData = $new['data'] ?? [$new];
+
+        return array_merge($existing, $newData);
+    }
+
+    private function hasNextPage(array $responseData, int $currentPage): bool
+    {
+        return isset($responseData['meta']) &&
+            $currentPage <= $responseData['meta']['last_page'];
     }
 
     /**
@@ -251,6 +276,21 @@ class PloiAPI
     public function updateEnv($serverId, $siteId, $data)
     {
         return $this->makeRequest('patch', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/env', $data);
+    }
+
+    public function getCertificates($serverId, $siteId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/certificates');
+    }
+
+    public function getCertificateDetails($serverId, $siteId, $certId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/certificates/'.$certId);
+    }
+
+    public function createCertificate($serverId, $siteId, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/certificates', $data);
     }
 
     /**
