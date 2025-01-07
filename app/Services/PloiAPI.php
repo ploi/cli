@@ -205,6 +205,16 @@ class PloiAPI
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/databases/'.$databaseId.'/users', $data);
     }
 
+    public function getServerLogs($serverId, $page = 1)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/logs', [], $page);
+    }
+
+    public function getServerLog($serverId, $logId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/logs/'.$logId);
+    }
+
     /**
      * Site Methods
      */

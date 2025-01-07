@@ -1,57 +1,51 @@
 <?php
 
-namespace App\Commands\Site;
+namespace App\Commands\Server;
 
 use App\Commands\Command as BaseCommand;
 use App\Commands\Concerns\InteractWithServer;
-use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
 
-class LogsSiteCommand extends BaseCommand
+class LogsServerCommand extends BaseCommand
 {
-    use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
+    use EnsureHasToken, HasPloiConfiguration, InteractWithServer;
 
-    protected $signature = 'logs:site {logid?} {--server=} {--site=}';
+    protected $signature = 'server:logs {logid?} {--server=}';
 
-    protected $description = 'Get the logs of a site';
-
-    protected array $site = [];
+    protected $description = 'Get the logs of a server';
 
     public function handle(): void
     {
         $this->ensureHasToken();
 
-        [$serverId, $siteId] = $this->getServerAndSite();
-        $this->site = $this->ploi->getSiteDetails($serverId, $siteId)['data'];
+        $serverId = $this->getServerId();
 
         $logId = $this->argument('logid');
 
-        $logId ? $this->displaySingleLog($serverId, $siteId, $logId) : $this->displayMultipleLogs($serverId, $siteId);
+        $logId ? $this->displaySingleLog($serverId, $logId) : $this->displayMultipleLogs($serverId);
     }
 
-    protected function displaySingleLog($serverId, $siteId, $logId): void
+    protected function displaySingleLog($serverId, $logId): void
     {
-        $log = $this->ploi->getSiteLog($serverId, $siteId, $logId)['data'];
+        $log = $this->ploi->getServerLog($serverId, $logId)['data'];
 
         $this->info("Description: {$log['description']}");
         $this->info('Type: '.($log['type'] ?? 'N/A'));
         $this->info("Created At: {$log['created_at']}");
-        $this->info("Relative Time: {$log['created_at_human']}");
         $this->line("Content: {$log['content']}");
     }
 
-    protected function displayMultipleLogs($serverId, $siteId): void
+    protected function displayMultipleLogs($serverId): void
     {
-        $logs = $this->ploi->getSiteLogs($serverId, $siteId)['data'];
+        $logs = $this->ploi->getServerLogs($serverId)['data'];
 
-        $headers = ['ID', 'Description', 'Type', 'Created At', 'Relative Time'];
+        $headers = ['ID', 'Description', 'Type', 'Created At'];
         $rows = collect($logs)->map(fn ($log) => [
             $log['id'],
             $log['description'],
             $log['type'] ?? 'N/A',
             $log['created_at'],
-            $log['created_at_human'],
         ])->toArray();
 
         $this->table($headers, $rows);
