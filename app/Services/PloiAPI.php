@@ -215,6 +215,16 @@ class PloiAPI
         return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/logs/'.$logId);
     }
 
+    public function getCronjobs($serverId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/crontabs');
+    }
+
+    public function createCronjob($serverId, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/crontabs', $data);
+    }
+
     /**
      * Site Methods
      */
