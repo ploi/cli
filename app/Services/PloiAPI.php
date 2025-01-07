@@ -335,4 +335,9 @@ class PloiAPI
     {
         return $this->makeRequest('get', $this->apiUrl.'/user');
     }
+
+    public function getProviders()
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/user/server-providers');
+    }
 }
