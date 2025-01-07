@@ -79,8 +79,6 @@ class CreateServerCommand extends Command
 
     public function createServer(): void
     {
-        ray($this->serverProviders);
-
         $responses = form()
             ->text(
                 label: 'What should be the name of the server?',
@@ -197,8 +195,6 @@ class CreateServerCommand extends Command
             ->submit();
 
         $responses['webserver_type'] = 'nginx';
-
-        ray(array_filter($responses));
 
         $server = $this->ploi->createServer(array_filter($responses))['data'];
         $this->info('Server creation initiated...');
