@@ -50,4 +50,9 @@ trait InteractWithServer
 
         return $server['id'];
     }
+
+    protected function systemUsers()
+    {
+        return $this->ploi->getSystemUsers($this->getServerId());
+    }
 }

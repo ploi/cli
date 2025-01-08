@@ -11,7 +11,7 @@ class ListNetworkRulesCommand extends BaseCommand
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer;
 
-    protected $signature = 'network-rules:list {--server=}';
+    protected $signature = 'network-rule:list {--server=}';
 
     protected $description = 'Get the list of network rules for a server';
 

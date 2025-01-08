@@ -145,6 +145,11 @@ class PloiAPI
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/system-users', $data);
     }
 
+    public function getSystemUsers($serverId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/system-users');
+    }
+
     public function restartServer($serverId)
     {
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/restart');
@@ -233,6 +238,41 @@ class PloiAPI
     public function getNetworkRules($serverId)
     {
         return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/network-rules');
+    }
+
+    public function createNetworkRule($serverId, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/network-rules', $data);
+    }
+
+    public function deleteNetworkRule($serverId, $ruleId)
+    {
+        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/network-rules/'.$ruleId);
+    }
+
+    public function getDaemons($serverId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/daemons');
+    }
+
+    public function createDaemon($serverId, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/daemons', $data);
+    }
+
+    public function pauseDaemon($serverId, $daemonId)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/daemons/'.$daemonId.'/toggle-pause');
+    }
+
+    public function restartDaemon($serverId, $daemonId)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/daemons/'.$daemonId.'/restart');
+    }
+
+    public function deleteDaemon($serverId, $daemonId)
+    {
+        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/daemons/'.$daemonId);
     }
 
     /**
