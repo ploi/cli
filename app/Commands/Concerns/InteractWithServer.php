@@ -39,7 +39,7 @@ trait InteractWithServer
 
     protected function getServerIdByNameOrIp(string $identifier): ?int
     {
-        $servers = collect($this->ploi->getServerList()['data']);
+        $servers = collect($this->ploi->getServerList(search: $identifier)['data']);
 
         $server = $servers->first(fn ($server) => $server['name'] === $identifier || $server['ip_address'] === $identifier);
 
