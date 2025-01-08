@@ -225,6 +225,11 @@ class PloiAPI
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/crontabs', $data);
     }
 
+    public function deleteCronjob($serverId, $cronjobId)
+    {
+        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/crontabs/'.$cronjobId);
+    }
+
     /**
      * Site Methods
      */
