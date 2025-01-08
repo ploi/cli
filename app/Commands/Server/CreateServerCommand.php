@@ -254,6 +254,6 @@ class CreateServerCommand extends Command
         }
 
 
-        $this->info('Server is ready!');
+        $this->success('Server is ready!');
     }
 }
