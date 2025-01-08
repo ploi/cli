@@ -383,7 +383,7 @@ class PloiAPI
         return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/certificates/'.$certId);
     }
 
-    public function listRedirects($serverId, $siteId)
+    public function getRedirects($serverId, $siteId)
     {
         return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/redirects');
     }
