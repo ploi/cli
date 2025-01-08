@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands\Server;
+namespace App\Commands\Server\Database;
 
 use App\Commands\Command;
 use App\Commands\Concerns\InteractWithServer;
@@ -12,7 +12,7 @@ use function Laravel\Prompts\error;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\spin;
 
-class DatabaseForgetCommand extends Command
+class ForgetDatabaseCommand extends Command
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 

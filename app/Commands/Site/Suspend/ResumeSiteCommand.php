@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands\Site;
+namespace App\Commands\Site\Suspend;
 
 use App\Commands\Command as BaseCommand;
 use App\Commands\Concerns\InteractWithServer;
@@ -11,7 +11,7 @@ class ResumeSiteCommand extends BaseCommand
 {
     use EnsureHasToken, InteractWithServer, InteractWithSite;
 
-    protected $signature = 'resume:site {--server=} {--site=}';
+    protected $signature = 'site:resume {--server=} {--site=}';
 
     protected $description = 'Resume a suspended website in your server';
 

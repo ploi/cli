@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands\Site;
+namespace App\Commands\Site\Redirect;
 
 use App\Commands\Command as BaseCommand;
 use App\Commands\Concerns\InteractWithServer;
@@ -16,7 +16,7 @@ class CreateRedirectCommand extends BaseCommand
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 
-    protected $signature = 'site:create-redirect {--server=} {--site=} {--from=} {--to=} {--type=}';
+    protected $signature = 'redirect:create {--server=} {--site=} {--from=} {--to=} {--type=}';
 
     protected $description = 'Create a site redirect.';
 

@@ -12,7 +12,7 @@ class LogsSiteCommand extends BaseCommand
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 
-    protected $signature = 'logs:site {logid?} {--server=} {--site=}';
+    protected $signature = 'site:logs {logid?} {--server=} {--site=}';
 
     protected $description = 'Get the logs of a site';
 

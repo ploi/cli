@@ -268,6 +268,11 @@ class PloiAPI
         return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/repository');
     }
 
+    public function deleteRepository($serverId, $siteId)
+    {
+        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/repository');
+    }
+
     public function enableTestDomain($serverId, $siteId)
     {
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/test-domain');

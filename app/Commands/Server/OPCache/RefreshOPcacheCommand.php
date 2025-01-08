@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands\Server;
+namespace App\Commands\Server\OPCache;
 
 use App\Commands\Command;
 use App\Commands\Concerns\InteractWithServer;
@@ -11,7 +11,7 @@ class RefreshOPcacheCommand extends Command
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer;
 
-    protected $signature = 'server:refresh-opcache {--server=}';
+    protected $signature = 'opcache:refresh {--server=}';
 
     protected $description = 'Refresh OPcache on a server';
 

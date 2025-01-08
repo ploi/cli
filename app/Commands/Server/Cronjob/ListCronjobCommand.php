@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Commands\Server;
+namespace App\Commands\Server\Cronjob;
 
 use App\Commands\Command as BaseCommand;
 use App\Commands\Concerns\InteractWithServer;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
 
-class ListCronjobsCommand extends BaseCommand
+class ListCronjobCommand extends BaseCommand
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer;
 
-    protected $signature = 'cronjobs {--server=}';
+    protected $signature = 'cronjob:list {--server=}';
 
     protected $description = 'Get the cronjobs on a server';
 

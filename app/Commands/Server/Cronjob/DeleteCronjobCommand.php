@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands\Server;
+namespace App\Commands\Server\Cronjob;
 
 use App\Commands\Command;
 use App\Commands\Concerns\InteractWithServer;
@@ -11,11 +11,11 @@ use function Laravel\Prompts\error;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\spin;
 
-class CronjobDeleteCommand extends Command
+class DeleteCronjobCommand extends Command
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer;
 
-    protected $signature = 'cronjobs:delete {--server=} {--cronjob-id= : The ID of the cronjob to delete}';
+    protected $signature = 'cronjob:delete {--server=} {--cronjob-id= : The ID of the cronjob to delete}';
 
     protected $description = 'Delete a cronjob on a server';
 

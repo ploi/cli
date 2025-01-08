@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands\Site;
+namespace App\Commands\Site\SSL;
 
 use App\Commands\Command as BaseCommand;
 use App\Commands\Concerns\InteractWithServer;

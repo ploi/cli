@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands\Server;
+namespace App\Commands\Server\OPCache;
 
 use App\Commands\Command;
 use App\Commands\Concerns\InteractWithServer;
@@ -13,7 +13,7 @@ class DisableOPcacheCommand extends Command
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer;
 
-    protected $signature = 'server:disable-opcache {--server=}';
+    protected $signature = 'opcache:disable {--server=}';
 
     protected $description = 'Disable OPcache on a server';
 

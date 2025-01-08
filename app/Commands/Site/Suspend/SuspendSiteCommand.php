@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands\Site;
+namespace App\Commands\Site\Suspend;
 
 use App\Commands\Command as BaseCommand;
 use App\Commands\Concerns\InteractWithServer;
@@ -15,7 +15,7 @@ class SuspendSiteCommand extends BaseCommand
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 
-    protected $signature = 'suspend:site {--server=} {--site=} {reason?}';
+    protected $signature = 'site:suspend {--server=} {--site=} {reason?}';
 
     protected $description = 'Suspend a website in your server';
 

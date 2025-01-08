@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands\Server;
+namespace App\Commands\Server\Database;
 
 use App\Commands\Command;
 use App\Commands\Concerns\InteractWithServer;
@@ -8,7 +8,7 @@ use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
 
-class DatabaseListCommand extends Command
+class ListDatabaseCommand extends Command
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 

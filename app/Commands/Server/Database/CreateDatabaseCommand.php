@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands\Server;
+namespace App\Commands\Server\Database;
 
 use App\Commands\Command;
 use App\Commands\Concerns\InteractWithServer;
@@ -15,7 +15,7 @@ use function Laravel\Prompts\select;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\text;
 
-class DatabaseCreateCommand extends Command
+class CreateDatabaseCommand extends Command
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands\Server;
+namespace App\Commands\Server\Database;
 
 use App\Commands\Command;
 use App\Commands\Concerns\InteractWithDatabase;
@@ -14,7 +14,7 @@ use function Laravel\Prompts\password;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\text;
 
-class DatabaseCreateUserCommand extends Command
+class CreateDatabaseUserCommand extends Command
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithDatabase, InteractWithServer, InteractWithSite;
 

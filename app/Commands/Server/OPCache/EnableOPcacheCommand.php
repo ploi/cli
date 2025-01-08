@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands\Server;
+namespace App\Commands\Server\OPCache;
 
 use App\Commands\Command;
 use App\Commands\Concerns\InteractWithServer;
@@ -11,7 +11,7 @@ class EnableOPcacheCommand extends Command
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer;
 
-    protected $signature = 'server:enable-opcache {--server=}';
+    protected $signature = 'opcache:enable {--server=}';
 
     protected $description = 'Enable OPcache on a server';
 

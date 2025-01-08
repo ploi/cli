@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands\Server;
+namespace App\Commands\Server\Cronjob;
 
 use App\Commands\Command as BaseCommand;
 use App\Commands\Concerns\InteractWithServer;
@@ -11,13 +11,13 @@ use function Laravel\Prompts\form;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
-class CreateCronjobsCommand extends BaseCommand
+class CreateCronjobCommand extends BaseCommand
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer;
 
-    protected $signature = 'cronjobs:create {--server=} {--user=} {--command=} {--frequency=}';
+    protected $signature = 'cronjob:create {--server=} {--user=} {--command=} {--frequency=}';
 
-    protected $description = 'Create a cronjobs on a server';
+    protected $description = 'Create a cronjob on a server';
 
     public function handle(): void
     {

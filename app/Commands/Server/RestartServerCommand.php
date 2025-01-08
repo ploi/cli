@@ -11,7 +11,7 @@ class RestartServerCommand extends Command
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer;
 
-    protected $signature = 'restart:server {--server=}';
+    protected $signature = 'server:restart {--server=}';
 
     protected $description = 'Restart a server';
 

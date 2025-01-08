@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Commands\Site;
+namespace App\Commands\Site\Repository;
 
 use App\Commands\Command as BaseCommand;
 use App\Commands\Concerns\InteractWithServer;
@@ -18,7 +18,7 @@ class InstallRepoCommand extends BaseCommand
 {
     use EnsureHasToken, HasPloiConfiguration, HasRepo, InteractWithServer, InteractWithSite;
 
-    protected $signature = 'install:repo {--server=} {--site=}';
+    protected $signature = 'repo:install {--server=} {--site=}';
 
     protected $description = 'Install the repository to your site';
 
@@ -48,18 +48,21 @@ class InstallRepoCommand extends BaseCommand
         $repoUrl = $this->confirmRepoUrl($localGitRepo);
         $branch = text('Which branch should be installed?', 'main');
 
-        if (! $this->ploi->installRepository($serverId, $siteDetails['id'], [
+        $repo = $this->ploi->installRepository($serverId, $siteDetails['id'], [
             'provider' => $provider,
             'branch' => $branch,
             'name' => $repoUrl,
-        ])) {
+        ])['data'];
+
+        if (! $repo) {
             $this->error('An error occurred while installing the repository! Please check your repository, provider, and permissions and try again.');
             exit(1);
         }
 
-        $testDomain = $this->ploi->enableTestDomain($serverId, $siteDetails['id'])['full_test_domain'] ?? $domain;
+        $domain = $siteDetails['test_domain'] ?: $domain;
+
         $this->info('Repository initialized! Go do some great stuff 🚀');
-        $this->success("You can see your project at: {$testDomain}");
+        $this->success("You can see your project at: {$domain}");
     }
 
     protected function getProvider(): string
