@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Commands\Server\Cronjob;
+namespace App\Commands\Server\Network;
 
 use App\Commands\Command as BaseCommand;
 use App\Commands\Concerns\InteractWithServer;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
 
-class ListCronjobCommand extends BaseCommand
+class ListNetworkRulesCommand extends BaseCommand
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer;
 
-    protected $signature = 'cronjob:list {--server=}';
+    protected $signature = 'network-rules:list {--server=}';
 
-    protected $description = 'Get the cronjobs on a server';
+    protected $description = 'Get the list of network rules for a server';
 
     public function handle(): void
     {
@@ -21,16 +21,17 @@ class ListCronjobCommand extends BaseCommand
 
         $serverId = $this->getServerId();
 
-        $cronjobs = $this->ploi->getCronjobs($serverId)['data'];
+        $rules = $this->ploi->getNetworkRules($serverId)['data'];
 
-        $headers = ['ID', 'Status', 'Command', 'User', 'Frequency', 'Created At'];
-        $rows = collect($cronjobs)->map(fn ($cronjob) => [
-            $cronjob['id'],
-            $cronjob['status'],
-            $cronjob['command'],
-            $cronjob['user'],
-            $cronjob['frequency'],
-            $cronjob['created_at'],
+        $headers = ['ID', 'Name', 'Port', 'From IP Address', 'Rule Type', 'Status', 'Created At'];
+        $rows = collect($rules)->map(fn ($rule) => [
+            $rule['id'],
+            $rule['name'],
+            $rule['port'],
+            $rule['from_ip_address'],
+            $rule['rule_type'],
+            $rule['status'],
+            $rule['created_at'],
         ])->toArray();
 
         $this->table($headers, $rows);

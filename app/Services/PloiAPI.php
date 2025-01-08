@@ -230,6 +230,11 @@ class PloiAPI
         return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/crontabs/'.$cronjobId);
     }
 
+    public function getNetworkRules($serverId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/network-rules');
+    }
+
     /**
      * Site Methods
      */
