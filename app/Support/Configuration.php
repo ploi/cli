@@ -14,7 +14,7 @@ class Configuration
     public function __construct()
     {
         try {
-            $this->config = Yaml::parseFile(getcwd().'/ploi.yml');
+            $this->config = Yaml::parseFile(getcwd().'/.ploi/settings.yml');
         } catch (Exception $e) {
             $this->config = [];
         }
@@ -22,7 +22,7 @@ class Configuration
 
     public function initialize(string $server, string $site, string $path, string $domain): void
     {
-        $configFile = $path.'/ploi.yml';
+        $configFile = $path.'/.ploi/settings.yml';
 
         $this->config = $this->getConfigFormat($server, $site, $domain);
 

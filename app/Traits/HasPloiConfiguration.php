@@ -16,6 +16,6 @@ trait HasPloiConfiguration
 
     public function hasPloiConfiguration(): bool
     {
-        return file_exists(getcwd().'/ploi.yml');
+        return file_exists(getcwd().'/.ploi/settings.yml');
     }
 }
