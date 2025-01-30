@@ -32,9 +32,11 @@ class Configuration
     protected function getConfigFormat(string $server, string $site, string $domain): array
     {
         return [
-            'site' => $site,
-            'server' => $server,
-            'domain' => $domain,
+            'settings' => [
+                'site' => $site,
+                'server' => $server,
+                'domain' => $domain,
+            ]
         ];
     }
 
