@@ -25,8 +25,6 @@ class EditSiteCommand extends BaseCommand
     {
         $this->ensureHasToken();
 
-        $this->hasPloiConfiguration();
-
         [$serverId, $siteId] = $this->getServerAndSite();
         $this->site = $this->ploi->getSiteDetails($serverId, $siteId)['data'];
 

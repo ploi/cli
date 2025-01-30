@@ -55,7 +55,7 @@ class InitCommand extends Command
 
     protected function isAlreadyInitialized(): bool
     {
-        return $this->hasPloiConfiguration() && ! $this->option('force');
+        return $this->hasPloiConfigurationFile() && ! $this->option('force');
     }
 
     protected function createNewSite($serverId): array

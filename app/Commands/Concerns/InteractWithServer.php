@@ -28,7 +28,7 @@ trait InteractWithServer
 
     protected function getServerId(): int
     {
-        if ($this->hasPloiConfiguration() && ! $this->option('server')) {
+        if ($this->hasPloiConfigurationFile() && ! $this->option('server')) {
             return $this->configuration->get('settings.server');
         }
 

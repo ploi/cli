@@ -4,18 +4,13 @@ namespace App\Traits;
 
 trait HasPloiConfiguration
 {
-    public function ensureHasPloiConfiguration()
-    {
-        if (! $this->hasPloiConfiguration()) {
-            $this->error('You have not yet linked this project to Ploi. Please run `ploi init` first.');
-            exit(1);
-        }
-
-        return true;
-    }
-
-    public function hasPloiConfiguration(): bool
+    public function hasPloiConfigurationFile(): bool
     {
         return file_exists(getcwd().'/.ploi/settings.yml');
+    }
+
+    public function hasPloiProvisionFile(): bool
+    {
+        return file_exists(getcwd().'/.ploi/provision.yml');
     }
 }
