@@ -17,6 +17,7 @@ trait EnsureHasToken
     {
         if (! $this->hasToken()) {
             $this->info('Please set your ploi api token first. Call "ploi token" to do that.');
+            $this->call('ploi:token');
             exit(1);
         }
 
