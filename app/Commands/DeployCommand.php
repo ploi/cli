@@ -8,6 +8,8 @@ use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
 use Illuminate\Support\Arr;
 
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\spin;
 
@@ -25,7 +27,8 @@ class DeployCommand extends Command
     {
         $this->ensureHasToken();
 
-        [$serverId, $siteId] = $this->getServerAndSite();
+        [$serverId, $siteId] = $this->getServerAndSiteFromConfig();
+
         $this->site = $this->ploi->getSiteDetails($serverId, $siteId)['data'];
 
         $data = [];
@@ -59,7 +62,7 @@ class DeployCommand extends Command
 
     protected function validateScheduleDatetime(string $datetime): void
     {
-        if (! preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}$/', $datetime)) {
+        if (!preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}$/', $datetime)) {
             $this->error('Please provide a valid datetime in the format: YYYY-MM-DD HH:MM.');
             exit(1);
         }
@@ -91,7 +94,7 @@ class DeployCommand extends Command
     protected function pollDeploymentStatus(string $serverId, string $siteId, string $domain): void
     {
         $maxAttempts = 60;   // Maximum number of polling attempts (10 minutes total with 10-second delay)
-        $delay = 10;         // Delay between each attempt in seconds
+        $delay = 5;         // Delay between each attempt in seconds
 
         $this->info('Deployment initiated!');
         $status = spin(
@@ -126,5 +129,22 @@ class DeployCommand extends Command
             'timeout' => $this->warn('Deployment status check timed out. Please check manually.'),
             default => $this->warn('Deployment status is unknown. Please check manually.')
         };
+    }
+
+    private function getServerAndSiteFromConfig(): array
+    {
+        try {
+            $deployConfig = file_exists('./.ploi/deploy.yml')
+                ? Yaml::parse(file_get_contents('./.ploi/deploy.yml'))['deploy'] ?? null
+                : null;
+
+            if ($deployConfig && isset($deployConfig['server_id'], $deployConfig['site_id'])) {
+                return [$deployConfig['server_id'], $deployConfig['site_id']];
+            }
+        } catch (ParseException $e) {
+            // YAML syntax is invalid
+        }
+
+        return $this->getServerAndSite();
     }
 }
