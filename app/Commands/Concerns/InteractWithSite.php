@@ -9,8 +9,8 @@ trait InteractWithSite
     protected function getServerAndSite(): array
     {
         if ($this->hasPloiConfiguration() && ! $this->option('server') && ! $this->option('site')) {
-            $serverId = $this->configuration->get('server');
-            $siteId = $this->configuration->get('site');
+            $serverId = $this->configuration->get('settings.server');
+            $siteId = $this->configuration->get('settings.site');
         } else {
             $serverIdentifier = $this->option('server') ?? $this->selectServer();
             $serverId = $this->getServerIdByNameOrIp($serverIdentifier);

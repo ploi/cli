@@ -27,7 +27,7 @@ class DeployCommand extends Command
     {
         $this->ensureHasToken();
 
-        [$serverId, $siteId] = $this->getServerAndSiteFromConfig();
+        [$serverId, $siteId] = $this->getServerAndSite();
 
         $this->site = $this->ploi->getSiteDetails($serverId, $siteId)['data'];
 
@@ -129,24 +129,5 @@ class DeployCommand extends Command
             'timeout' => $this->warn('Deployment status check timed out. Please check manually.'),
             default => $this->warn('Deployment status is unknown. Please check manually.')
         };
-    }
-
-    private function getServerAndSiteFromConfig(): array
-    {
-        try {
-            $deployConfig = file_exists('./.ploi/settings.yml')
-                ? Yaml::parse(file_get_contents('./.ploi/settings.yml'))['settings'] ?? null
-                : null;
-
-            if ($deployConfig && isset($deployConfig['server_id'], $deployConfig['site_id'])) {
-                $this->info('The file setting.yml was found in the .ploi folder, using these credentials to deploy your application');
-
-                return [$deployConfig['server_id'], $deployConfig['site_id']];
-            }
-        } catch (ParseException $e) {
-            // YAML syntax is invalid
-        }
-
-        return $this->getServerAndSite();
     }
 }
