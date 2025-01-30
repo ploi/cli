@@ -144,7 +144,7 @@ class InitCommand extends Command
     protected function linkProject(bool $createNewSite, string $domain): void
     {
         if (! $createNewSite) {
-            $this->info("Your project is linked to {$domain}!");
+            $this->info("Your project is linked to {$domain}, the settings file has been created in the .ploi folder.");
         }
     }
 
