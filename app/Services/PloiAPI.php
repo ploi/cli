@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 
@@ -18,7 +19,11 @@ class PloiAPI
     {
         $this->apiKey = config('ploi.token');
         $this->apiUrl = Config::get('ploi.api_url');
-        $this->headers = ['User-Agent' => 'Ploi CLI'];
+        $this->headers = [
+            'User-Agent' => 'Ploi CLI',
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ];
     }
 
     public function setToken(string $apiKey): void
@@ -85,14 +90,14 @@ class PloiAPI
     private function handleValidationError(Response $response): never
     {
         $errors = $response->json()['errors'];
-        $errorMessage = "\033[31m ==> \033[0m\033[1;37;40m";
+        $errorMessage = "\033[31m ==> \033[0m\033[1;37m";
 
         foreach ($errors as $error) {
-            $errorMessage .= is_array($error) ? json_encode($error) : $error;
+            $errorMessage .= is_array($error) ? Arr::first($error) : $error;
             $errorMessage .= ' ';
         }
 
-        exit($errorMessage."\033[0m");
+        exit($errorMessage."\033[0m\n");
     }
 
     private function mergeResponseData(array $existing, array $new): array
