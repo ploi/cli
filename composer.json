@@ -27,11 +27,12 @@
         "php": "^8.2.0",
         "guzzlehttp/guzzle": "^7.0",
         "illuminate/http": "^11.33",
-        "laravel-zero/framework": "^11.0.2",
+
         "laravel/prompts": "^0.3.2",
         "symfony/yaml": "^7.2"
     },
     "require-dev": {
+        "laravel-zero/framework": "^11.0.2",
         "laravel/pint": "^1.18",
         "mockery/mockery": "^1.6.12",
         "pestphp/pest": "^3.5.1",
@@ -59,5 +60,5 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
-    "bin": ["ploi"]
+    "bin": ["builds/ploi"]
 }
