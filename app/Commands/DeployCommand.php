@@ -6,6 +6,7 @@ use App\Commands\Concerns\InteractWithServer;
 use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
+use Illuminate\Support\Arr;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\spin;
@@ -73,35 +74,57 @@ class DeployCommand extends Command
     {
         $deploying = $this->ploi->deploySite($serverId, $siteId, $data);
 
-        if (! isset($deploying['message'])) {
+        if (isset($deploying['error'])) {
             $this->error($deploying['error']);
             exit();
         }
 
-        $this->info($deploying['message']);
+        $this->info(Arr::first($deploying['data'])['message']);
 
         if ($isScheduled) {
             return;
         }
 
-        $statusChecked = spin(
-            callback: function () use ($serverId, $siteId, $domain) {
-                while (true) {
-                    sleep(10);
+        $this->pollDeploymentStatus($serverId, $siteId, $domain);
+    }
 
+    protected function pollDeploymentStatus(string $serverId, string $siteId, string $domain): void
+    {
+        $maxAttempts = 60;   // Maximum number of polling attempts (10 minutes total with 10-second delay)
+        $delay = 10;         // Delay between each attempt in seconds
+
+        $this->info('Deployment initiated!');
+        $status = spin(
+            callback: function () use ($serverId, $siteId, $domain, $maxAttempts, $delay) {
+                for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
                     $deploymentStatus = $this->ploi->getSiteDetails($serverId, $siteId)['data']['status'] ?? 'deploying';
 
-                    $statusMap = [
-                        'active' => ['type' => 'success', 'message' => "Deployment completed successfully. Site is live on: {$domain}"],
-                        'deploy-failed' => ['type' => 'error', 'message' => 'Your recent deployment has failed, please check recent deploy log for errors.'],
-                    ];
+                    // If we get a final status, return it
+                    if (in_array($deploymentStatus, ['active', 'deploy-failed'])) {
+                        return [
+                            'status' => $deploymentStatus,
+                            'domain' => $domain,
+                        ];
+                    }
 
-                    return $statusMap[$deploymentStatus] ?? ['type' => 'warn', 'message' => 'Deployment status is unknown. Please check manually.'];
+                    sleep($delay);
                 }
+
+                // If we've exceeded max attempts, return timeout status
+                return [
+                    'status' => 'timeout',
+                    'domain' => $domain,
+                ];
             },
             message: 'Checking deployment status...'
         );
 
-        $this->console($statusChecked['message'], $statusChecked['type']);
+        // Handle the deployment result
+        match ($status['status']) {
+            'active' => $this->success("Deployment completed successfully. Site is live on: {$status['domain']}"),
+            'deploy-failed' => $this->error('Your recent deployment has failed, please check recent deploy log for errors.'),
+            'timeout' => $this->warn('Deployment status check timed out. Please check manually.'),
+            default => $this->warn('Deployment status is unknown. Please check manually.')
+        };
     }
 }
