@@ -13,6 +13,7 @@ If you discover any security related issues, please email security@ploi.io inste
 
 - [Felix Schmid](https://github.com/schmidfelix) (Original author)
 - [Stan Menten](https://stanmenten.dev/) (Maintainer)
+- [Dennis Smink](https://github.com/cannonb4ll) (Maintainer)
 - [Ploi](https://ploi.io)
 - [All Contributors](../../contributors)
 
