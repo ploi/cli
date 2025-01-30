@@ -27,7 +27,6 @@
         "php": "^8.2.0",
         "guzzlehttp/guzzle": "^7.0",
         "illuminate/http": "^11.33",
-
         "laravel/prompts": "^0.3.2",
         "symfony/yaml": "^7.2"
     },
