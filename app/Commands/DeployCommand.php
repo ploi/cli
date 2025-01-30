@@ -134,11 +134,13 @@ class DeployCommand extends Command
     private function getServerAndSiteFromConfig(): array
     {
         try {
-            $deployConfig = file_exists('./.ploi/deploy.yml')
-                ? Yaml::parse(file_get_contents('./.ploi/deploy.yml'))['deploy'] ?? null
+            $deployConfig = file_exists('./.ploi/settings.yml')
+                ? Yaml::parse(file_get_contents('./.ploi/settings.yml'))['settings'] ?? null
                 : null;
 
             if ($deployConfig && isset($deployConfig['server_id'], $deployConfig['site_id'])) {
+                $this->info('The file setting.yml was found in the .ploi folder, using these credentials to deploy your application');
+
                 return [$deployConfig['server_id'], $deployConfig['site_id']];
             }
         } catch (ParseException $e) {
