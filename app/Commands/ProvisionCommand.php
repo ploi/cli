@@ -22,14 +22,22 @@ class ProvisionCommand extends Command
             $this->warn("You do not own a provision.yml file in your .ploi folder. Please create this file.");
         }
 
+        $this->info('Starting up server creation via the provison.yml file');
+
         $provision = $this->configuration->get('provision');
 
-        $server = $this->getServerIdByNameOrIp($provision['server']['name']);
+        $checkServer = collect($this->ploi->getServerList(search: $provision['server']['name'])['data'])
+            ->first(fn ($server) => $server['name'] === $provision['server']['name'] || $server['ip_address'] === $provision['server']['name']);
 
         // If we already have the server, we should skip.
-        if (is_int($server)) {
+        if ($checkServer) {
             $this->warn('This server already exists, aborting.');
             exit(0);
         }
+
+        $this->success('This server does not exist yet, we can continue with creating!');
+
+        $server = $this->ploi->createServer($provision['server'])['data'];
+        $this->info('Server creation initiated...');
     }
 }

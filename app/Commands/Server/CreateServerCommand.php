@@ -3,6 +3,7 @@
 namespace App\Commands\Server;
 
 use App\Commands\Command;
+use App\Commands\Concerns\InteractWithServer;
 use App\Commands\Concerns\InteractWithUser;
 use App\Traits\EnsureHasToken;
 
@@ -14,7 +15,7 @@ use function Laravel\Prompts\text;
 
 class CreateServerCommand extends Command
 {
-    use EnsureHasToken, InteractWithUser;
+    use EnsureHasToken, InteractWithUser, InteractWithServer;
 
     protected $signature = 'server:create {--custom}';
 
@@ -31,11 +32,11 @@ class CreateServerCommand extends Command
     ];
 
     protected static array $database_types = [
-        'none' => 'Do not install a database',
         'mysql' => 'MySQL',
         'mariadb' => 'MariaDB',
         'postgresql' => 'PostgreSQL',
         'postgresql13' => 'PostgreSQL 13',
+        'none' => 'Do not install a database',
     ];
 
     protected static array $os_types = [
@@ -46,7 +47,6 @@ class CreateServerCommand extends Command
     ];
 
     protected static array $php_versions = [
-        'none' => 'Do not install PHP',
         '8.4' => '8.4',
         '8.3' => '8.3',
         '8.2' => '8.2',
@@ -57,6 +57,7 @@ class CreateServerCommand extends Command
         '7.2' => '7.2',
         '7.1' => '7.1',
         '7.0' => '7.0',
+        'none' => 'Do not install PHP',
     ];
 
     public function handle(): void
@@ -199,61 +200,7 @@ class CreateServerCommand extends Command
         $server = $this->ploi->createServer(array_filter($responses))['data'];
         $this->info('Server creation initiated...');
         $this->pollServerStatus($server['id']);
-
     }
 
     public function createCustomServer() {}
-
-    protected function pollServerStatus(string $serverId): void
-    {
-        $maxAttempts = 100;  // Maximum number of polling attempts per status
-        $delay = 15;        // Delay between each attempt in seconds
-
-        $this->info('Server is being created!');
-        $isCreated = spin(
-            callback: function () use ($serverId, $maxAttempts, $delay) {
-                for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
-                    $status = $this->ploi->getServerDetails($serverId)['data']['status'];
-                    if ($status === 'building') {
-                        return true;
-                    }
-                    sleep($delay);
-                }
-
-                return false;
-            },
-            message: 'Waiting for the server to be created...'
-        );
-
-        if (! $isCreated) {
-            $this->error('Server creation timed out.');
-
-            return;
-        }
-
-        $this->info('Server is being built!');
-        $isBuilding = spin(
-            callback: function () use ($serverId, $maxAttempts, $delay) {
-                for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
-                    $status = $this->ploi->getServerDetails($serverId)['data']['status'];
-                    if ($status === 'active') {
-                        return true;
-                    }
-                    sleep($delay);
-                }
-
-                return false;
-            },
-            message: 'Waiting for the server to finish building...'
-        );
-
-        if (! $isBuilding) {
-            $this->error('Server building timed out.');
-
-            return;
-        }
-
-
-        $this->success('Server is ready!');
-    }
 }

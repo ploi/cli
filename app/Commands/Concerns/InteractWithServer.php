@@ -3,6 +3,7 @@
 namespace App\Commands\Concerns;
 
 use function Laravel\Prompts\select;
+use function Laravel\Prompts\spin;
 
 trait InteractWithServer
 {
@@ -54,5 +55,57 @@ trait InteractWithServer
     protected function systemUsers()
     {
         return $this->ploi->getSystemUsers($this->getServerId());
+    }
+
+    protected function pollServerStatus(string $serverId): void
+    {
+        $maxAttempts = 100;  // Maximum number of polling attempts per status
+        $delay = 15;        // Delay between each attempt in seconds
+
+        $this->info('Server is being created!');
+        $isCreated = spin(
+            callback: function () use ($serverId, $maxAttempts, $delay) {
+                for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+                    $status = $this->ploi->getServerDetails($serverId)['data']['status'];
+                    if ($status === 'building') {
+                        return true;
+                    }
+                    sleep($delay);
+                }
+
+                return false;
+            },
+            message: 'Waiting for the server to be created...'
+        );
+
+        if (! $isCreated) {
+            $this->error('Server creation timed out.');
+
+            return;
+        }
+
+        $this->info('Server is being built!');
+        $isBuilding = spin(
+            callback: function () use ($serverId, $maxAttempts, $delay) {
+                for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+                    $status = $this->ploi->getServerDetails($serverId)['data']['status'];
+                    if ($status === 'active') {
+                        return true;
+                    }
+                    sleep($delay);
+                }
+
+                return false;
+            },
+            message: 'Waiting for the server to finish building...'
+        );
+
+        if (! $isBuilding) {
+            $this->error('Server building timed out.');
+
+            return;
+        }
+
+        $this->success('Server is ready!');
     }
 }
