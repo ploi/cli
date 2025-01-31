@@ -57,7 +57,7 @@ trait InteractWithServer
         return $this->ploi->getSystemUsers($this->getServerId());
     }
 
-    protected function pollServerStatus(string $serverId): void
+    protected function pollServerStatus(string $serverId): ?bool
     {
         $maxAttempts = 100;  // Maximum number of polling attempts per status
         $delay = 15;        // Delay between each attempt in seconds
@@ -81,7 +81,7 @@ trait InteractWithServer
         if (! $isCreated) {
             $this->error('Server creation timed out.');
 
-            return;
+            return false;
         }
 
         $this->info('Server is being built!');
@@ -103,9 +103,11 @@ trait InteractWithServer
         if (! $isBuilding) {
             $this->error('Server building timed out.');
 
-            return;
+            return false;
         }
 
         $this->success('Server is ready!');
+
+        return true;
     }
 }

@@ -71,7 +71,7 @@ class ProvisionCommand extends Command
         $done = $this->pollServerStatus($server['id']);
 
         if ($done) {
-            // Do the rest
+            //
         }
     }
 }
