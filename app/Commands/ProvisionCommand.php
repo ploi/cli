@@ -17,6 +17,9 @@ class ProvisionCommand extends Command
 
     public function handle()
     {
+        $this->warn("This command is still WIP, will be finished very soon");
+        return;
+
         $this->ensureHasToken();
 
         if (!$this->hasPloiProvisionFile()) {
@@ -37,7 +40,6 @@ class ProvisionCommand extends Command
         }
 
         $this->success('This server does not exist yet, we can continue with creating!');;
-
 
         $this->newLine();
 
