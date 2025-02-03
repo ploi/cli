@@ -82,19 +82,23 @@ class PloiAPI
     {
         match ($response->status()) {
             404 => exit('Resource not found.'),
-            422 => $this->handleValidationError($response),
+            422, 403 => $this->handleValidationError($response),
             default => $response
         };
     }
 
     private function handleValidationError(Response $response): never
     {
-        $errors = $response->json()['errors'];
+        $error = $response->json()['error'] ?? $response->json()['errors'] ?? null;
         $errorMessage = "\033[31m ==> \033[0m\033[1;37m";
 
-        foreach ($errors as $error) {
-            $errorMessage .= is_array($error) ? Arr::first($error) : $error;
-            $errorMessage .= ' ';
+        if (is_string($error)) {
+            $errorMessage .= $error;
+        } elseif (is_array($error)) {
+            foreach ($error as $e) {
+                $errorMessage .= is_array($e) ? Arr::first($e) : $e;
+                $errorMessage .= ' ';
+            }
         }
 
         exit($errorMessage."\033[0m\n");
