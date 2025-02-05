@@ -22,33 +22,7 @@ trait EnsureHasToken
             exit(1);
         }
 
-        if (!$this->validateToken()) {
-            $this->info('Your ploi api token is invalid. Please set a valid token.');
-            $this->call('ploi:token');
-            exit(1);
-        }
-
         return true;
     }
 
-    protected function validateToken(): bool
-    {
-        $response = $this->ploi->checkUser();
-
-        if (empty($response) || !is_array($response)) {
-            return false;
-        }
-
-        $data = $response['data'] ?? [];
-
-        if (empty($data) || !is_array($data)) {
-            return false;
-        }
-
-        if (isset($data[0]['message']) && $data[0]['message'] === 'Unauthenticated.') {
-            return false;
-        }
-
-        return true;
-    }
 }
