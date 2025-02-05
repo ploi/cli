@@ -10,12 +10,13 @@ trait EnsureHasToken
             return true;
         }
 
-        return config('ploi.token') !== null && config('ploi.token') !== '';
+        $token = config('ploi.token');
+        return !empty($token);
     }
 
     protected function ensureHasToken()
     {
-        if (! $this->hasToken()) {
+        if (!$this->hasToken()) {
             $this->info('Please set your ploi api token first.');
             $this->call('ploi:token');
             exit(1);
@@ -23,4 +24,5 @@ trait EnsureHasToken
 
         return true;
     }
+
 }

@@ -82,17 +82,23 @@ class PloiAPI
     {
         match ($response->status()) {
             404 => exit('Resource not found.'),
-            422, 403 => $this->handleValidationError($response),
+            422, 403, 401 => $this->handleValidationError($response),
             default => $response
         };
     }
 
     private function handleValidationError(Response $response): never
     {
-        $error = $response->json()['error'] ?? $response->json()['errors'] ?? null;
+        $error = $response->json()['error']
+            ?? $response->json()['errors']
+            ?? $response->json()['message']
+            ?? null;
+
         $errorMessage = "\033[31m ==> \033[0m\033[1;37m";
 
-        if (is_string($error)) {
+        if ($error === "Unauthenticated.") {
+            $errorMessage .= "The given API key is incorrect. Use 'ploi:token --force' to set a new one.";
+        } elseif (is_string($error)) {
             $errorMessage .= $error;
         } elseif (is_array($error)) {
             foreach ($error as $e) {
@@ -101,7 +107,7 @@ class PloiAPI
             }
         }
 
-        exit($errorMessage."\033[0m\n");
+        exit($errorMessage . "\033[0m\n");
     }
 
     private function mergeResponseData(array $existing, array $new): array
