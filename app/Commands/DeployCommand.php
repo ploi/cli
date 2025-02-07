@@ -42,7 +42,7 @@ class DeployCommand extends Command
             );
 
             if ($deployToProduction) {
-                $this->deploy($serverId, $siteId, $this->site['domain'], [], true);
+                $this->deploy($serverId, $siteId, $this->site['domain'], [], true, 'production');
 
                 return;
             }
@@ -73,9 +73,15 @@ class DeployCommand extends Command
         }
     }
 
-    protected function deploy($serverId, $siteId, $domain, $data, $isScheduled = false): void
+    protected function deploy($serverId, $siteId, $domain, $data, $isScheduled = false, $toProduction = false): void
     {
-        $deploying = $this->ploi->deploySite($serverId, $siteId, $data);
+        if ($toProduction) {
+            $this->info("Deploying to production for {$domain}...");
+            $deploying = $this->ploi->deployToProduction($serverId, $siteId);
+        } else {
+            $this->info("Deploying {$domain}...");
+            $deploying = $this->ploi->deploySite($serverId, $siteId, $data);
+        }
 
         if (isset($deploying['error'])) {
             $this->error($deploying['error']);
