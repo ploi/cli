@@ -458,6 +458,11 @@ class PloiAPI
         return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/aliases/'.$alias);
     }
 
+    public function resetSitePermissions($serverId, $siteId)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/permission-reset');
+    }
+
     /**
      * User Methods
      */
