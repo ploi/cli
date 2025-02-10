@@ -418,6 +418,21 @@ class PloiAPI
         return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/redirects/'.$redirectId);
     }
 
+    public function getTenants($serverId, $siteId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/tenants');
+    }
+
+    public function createTenant($serverId, $siteId, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/tenants', $data);
+    }
+
+    public function deleteTenant($serverId, $siteId, $tenant)
+    {
+        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/tenants/'.$tenant);
+    }
+
     /**
      * User Methods
      */
