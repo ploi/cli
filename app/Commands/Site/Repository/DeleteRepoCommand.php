@@ -16,7 +16,7 @@ class DeleteRepoCommand extends Command
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 
-    protected $signature = 'repo:delete {--server=} {--site=}';
+    protected $signature = 'repository:delete {--server=} {--site=}';
 
     protected $description = 'Delete a repository connected to your site';
 
