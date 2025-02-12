@@ -22,11 +22,10 @@ jobs:
           tag_prefix: "v"
           major_pattern: "BREAKING CHANGE:"
           minor_pattern: "feat:"
-          format: "${major}.${minor}"
+          version_format: "${major}.${minor}"
           bump_each_commit: true
           search_commit_body: false
-          initial_version: "1.3"  # Start from your current version
-          version_format: "${major}.${minor}"
+          debug: true
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -38,8 +37,13 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
 
+      - name: Print Current Tags
+        run: |
+          echo "Current tags:"
+          git tag -l
+
       - name: Build Laravel Zero app
-        run: php ploi app:build ploi --build-version=${{ steps.semver.outputs.version }}
+        run: php ploi app:build ploi --build-version=${{ steps.semver.outputs.version_tag }}
 
       - name: Configure Git
         run: |
