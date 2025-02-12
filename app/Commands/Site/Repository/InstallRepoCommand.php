@@ -18,7 +18,7 @@ class InstallRepoCommand extends BaseCommand
 {
     use EnsureHasToken, HasPloiConfiguration, HasRepo, InteractWithServer, InteractWithSite;
 
-    protected $signature = 'repo:install {--server=} {--site=}';
+    protected $signature = 'repository:install {--server=} {--site=}';
 
     protected $description = 'Install the repository to your site';
 
