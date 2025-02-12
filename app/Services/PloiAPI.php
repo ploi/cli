@@ -443,6 +443,41 @@ class PloiAPI
         return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/tenants/'.$tenant.'/revoke-certificate', $data);
     }
 
+    public function getAliases($serverId, $siteId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/aliases');
+    }
+
+    public function createAlias($serverId, $siteId, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/aliases', $data);
+    }
+
+    public function deleteAlias($serverId, $siteId, $alias)
+    {
+        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/aliases/'.$alias);
+    }
+
+    public function resetSitePermissions($serverId, $siteId)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/permission-reset');
+    }
+
+    public function getAuthUsers($serverId, $siteId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/auth-users');
+    }
+
+    public function createAuthUser($serverId, $siteId, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/auth-users', $data);
+    }
+
+    public function deleteAuthUser($serverId, $siteId, $authUserId)
+    {
+        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/auth-users/'.$authUserId);
+    }
+
     /**
      * User Methods
      */
