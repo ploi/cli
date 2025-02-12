@@ -290,21 +290,6 @@ class PloiAPI
         return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/daemons/'.$daemonId);
     }
 
-    public function getInsights($serverId)
-    {
-        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/insights');
-    }
-
-    public function fixInsight($serverId, $insightId)
-    {
-        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/insights/'.$insightId.'/automatically-fix');
-    }
-
-    public function ignoreInsight($serverId, $insightId)
-    {
-        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/insights/'.$insightId.'/ignore');
-    }
-
     /**
      * Site Methods
      */
@@ -348,19 +333,9 @@ class PloiAPI
         return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/repository');
     }
 
-    public function getTestDomain($serverId, $siteId)
-    {
-        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/test-domain');
-    }
-
     public function enableTestDomain($serverId, $siteId)
     {
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/test-domain');
-    }
-
-    public function disableTestDomain($serverId, $siteId)
-    {
-        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/test-domain');
     }
 
     public function deploySite($serverId, $siteId, $data)
@@ -456,6 +431,16 @@ class PloiAPI
     public function deleteTenant($serverId, $siteId, $tenant)
     {
         return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/tenants/'.$tenant);
+    }
+
+    public function requestCertificateTenant($serverId, $siteId, $tenant, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/tenants/'.$tenant.'/request-certificate', $data);
+    }
+
+    public function revokeCertificateTenant($serverId, $siteId, $tenant, $data)
+    {
+        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/tenants/'.$tenant.'/revoke-certificate', $data);
     }
 
     public function getAliases($serverId, $siteId)
