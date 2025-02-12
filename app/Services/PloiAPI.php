@@ -290,6 +290,21 @@ class PloiAPI
         return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/daemons/'.$daemonId);
     }
 
+    public function getInsights($serverId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/insights');
+    }
+
+    public function fixInsight($serverId, $insightId)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/insights/'.$insightId.'/automatically-fix');
+    }
+
+    public function ignoreInsight($serverId, $insightId)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/insights/'.$insightId.'/ignore');
+    }
+
     /**
      * Site Methods
      */
@@ -333,9 +348,19 @@ class PloiAPI
         return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/repository');
     }
 
+    public function getTestDomain($serverId, $siteId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/test-domain');
+    }
+
     public function enableTestDomain($serverId, $siteId)
     {
         return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/test-domain');
+    }
+
+    public function disableTestDomain($serverId, $siteId)
+    {
+        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/test-domain');
     }
 
     public function deploySite($serverId, $siteId, $data)
@@ -416,6 +441,56 @@ class PloiAPI
     public function deleteRedirect($serverId, $siteId, $redirectId)
     {
         return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/redirects/'.$redirectId);
+    }
+
+    public function getTenants($serverId, $siteId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/tenants');
+    }
+
+    public function createTenant($serverId, $siteId, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/tenants', $data);
+    }
+
+    public function deleteTenant($serverId, $siteId, $tenant)
+    {
+        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/tenants/'.$tenant);
+    }
+
+    public function getAliases($serverId, $siteId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/aliases');
+    }
+
+    public function createAlias($serverId, $siteId, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/aliases', $data);
+    }
+
+    public function deleteAlias($serverId, $siteId, $alias)
+    {
+        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/aliases/'.$alias);
+    }
+
+    public function resetSitePermissions($serverId, $siteId)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/permission-reset');
+    }
+
+    public function getAuthUsers($serverId, $siteId)
+    {
+        return $this->makeRequest('get', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/auth-users');
+    }
+
+    public function createAuthUser($serverId, $siteId, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/auth-users', $data);
+    }
+
+    public function deleteAuthUser($serverId, $siteId, $authUserId)
+    {
+        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/auth-users/'.$authUserId);
     }
 
     /**
