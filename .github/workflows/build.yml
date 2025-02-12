@@ -19,7 +19,7 @@ jobs:
         id: semver
         uses: PaulHatch/semantic-version@v5.3.0
         with:
-          tag_prefix: "v"
+          tag_prefix: ""
           major_pattern: "BREAKING CHANGE:"
           minor_pattern: "feat:"
           version_format: "${major}.${minor}"
@@ -37,13 +37,8 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
 
-      - name: Print Current Tags
-        run: |
-          echo "Current tags:"
-          git tag -l
-
       - name: Build Laravel Zero app
-        run: php ploi app:build ploi --build-version=${{ steps.semver.outputs.version_tag }}
+        run: php ploi app:build ploi --build-version=${{ steps.semver.outputs.version }}
 
       - name: Configure Git
         run: |
@@ -54,7 +49,7 @@ jobs:
         run: |
           git add builds/ploi
           git commit -m "Update application build to version ${{ steps.semver.outputs.version }} [skip ci]" || echo "No changes to commit"
-          git tag -a "v${{ steps.semver.outputs.version }}" -m "Version ${{ steps.semver.outputs.version }}"
+          git tag -a "${{ steps.semver.outputs.version }}" -m "Version ${{ steps.semver.outputs.version }}"
 
       - name: Push changes
         uses: ad-m/github-push-action@master
