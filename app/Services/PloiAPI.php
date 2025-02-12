@@ -433,6 +433,16 @@ class PloiAPI
         return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/tenants/'.$tenant);
     }
 
+    public function requestCertificateTenant($serverId, $siteId, $tenant, $data)
+    {
+        return $this->makeRequest('post', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/tenants/'.$tenant.'/request-certificate', $data);
+    }
+
+    public function revokeCertificateTenant($serverId, $siteId, $tenant, $data)
+    {
+        return $this->makeRequest('delete', $this->apiUrl.'/servers/'.$serverId.'/sites/'.$siteId.'/tenants/'.$tenant.'/revoke-certificate', $data);
+    }
+
     /**
      * User Methods
      */
