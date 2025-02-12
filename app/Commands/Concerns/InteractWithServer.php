@@ -11,7 +11,7 @@ trait InteractWithServer
     {
         $servers = $this->ploi->getServerList()['data'];
 
-        if (! $servers) {
+        if (!$servers) {
             $this->error('No servers found! Please create a server first.');
             exit(1);
         }
@@ -29,7 +29,7 @@ trait InteractWithServer
 
     protected function getServerId(): int
     {
-        if ($this->hasPloiConfigurationFile() && ! $this->option('server')) {
+        if ($this->hasPloiConfigurationFile() && !$this->option('server')) {
             return $this->configuration->get('settings.server');
         }
 
@@ -42,9 +42,12 @@ trait InteractWithServer
     {
         $servers = collect($this->ploi->getServerList(search: $identifier)['data']);
 
-        $server = $servers->first(fn ($server) => $server['name'] === $identifier || $server['ip_address'] === $identifier);
+        $server = $servers->first(fn ($server) =>
+            $server['name'] === $identifier ||
+            $server['ip_address'] === $identifier
+        );
 
-        if (! $server) {
+        if (!$server) {
             $this->error("Server with name or IP '{$identifier}' not found.");
             exit(1);
         }
@@ -78,9 +81,8 @@ trait InteractWithServer
             message: 'Waiting for the server to be created...'
         );
 
-        if (! $isCreated) {
+        if (!$isCreated) {
             $this->error('Server creation timed out.');
-
             return false;
         }
 
@@ -100,14 +102,12 @@ trait InteractWithServer
             message: 'Waiting for the server to finish building...'
         );
 
-        if (! $isBuilding) {
+        if (!$isBuilding) {
             $this->error('Server building timed out.');
-
             return false;
         }
 
         $this->success('Server is ready!');
-
         return true;
     }
 }
