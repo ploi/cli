@@ -22,6 +22,10 @@ jobs:
           tag_prefix: "v"
           major_pattern: "BREAKING CHANGE:"
           minor_pattern: "feat:"
+          format: "${major}.${minor}"
+          bump_each_commit: true
+          search_commit_body: false
+          initial_version: "1.3"  # Start from your current version
           version_format: "${major}.${minor}"
 
       - name: Setup PHP
