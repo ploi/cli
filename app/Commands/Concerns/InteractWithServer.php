@@ -29,15 +29,11 @@ trait InteractWithServer
 
     protected function getServerId(): int
     {
-        if ($this->hasPloiConfigurationFile() &&
-            !$this->argument('server') &&
-            !$this->option('server')) {
+        if ($this->hasPloiConfigurationFile() && !$this->option('server')) {
             return $this->configuration->get('settings.server');
         }
 
-        $serverIdentifier = $this->argument('server')
-            ?? $this->option('server')
-            ?? $this->selectServer();
+        $serverIdentifier = $this->option('server') ?? $this->selectServer();
 
         return $this->getServerIdByNameOrIp($serverIdentifier);
     }

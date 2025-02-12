@@ -59,7 +59,11 @@ class Configuration
 
     public function store(string $configFile, string $type): void
     {
-        // Wrap the content in the type key when storing
+        $directory = dirname($configFile);
+        if (!is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
         $wrappedConfig = [
             $type => $this->configs[$type]
         ];
