@@ -15,17 +15,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get Next Version
-        id: semver
-        uses: PaulHatch/semantic-version@v5.3.0
-        with:
-          tag_prefix: ""
-          major_pattern: "BREAKING CHANGE:"
-          minor_pattern: "feat:"
-          version_format: "${major}.${minor}"
-          bump_each_commit: true
-          search_commit_body: false
-          debug: true
+      - name: Get latest tag
+        id: previoustag
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "1.3")
+          echo "tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          # Increment minor version
+          MAJOR=$(echo $LATEST_TAG | cut -d. -f1)
+          MINOR=$(echo $LATEST_TAG | cut -d. -f2)
+          NEXT_MINOR=$((MINOR + 1))
+          NEXT_VERSION="${MAJOR}.${NEXT_MINOR}"
+          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -38,7 +38,7 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-suggest
 
       - name: Build Laravel Zero app
-        run: php ploi app:build ploi --build-version=${{ steps.semver.outputs.version }}
+        run: php ploi app:build ploi --build-version=${{ steps.previoustag.outputs.next_version }}
 
       - name: Configure Git
         run: |
@@ -48,8 +48,8 @@ jobs:
       - name: Commit build
         run: |
           git add builds/ploi
-          git commit -m "Update application build to version ${{ steps.semver.outputs.version }} [skip ci]" || echo "No changes to commit"
-          git tag -a "${{ steps.semver.outputs.version }}" -m "Version ${{ steps.semver.outputs.version }}"
+          git commit -m "Update application build to version ${{ steps.previoustag.outputs.next_version }} [skip ci]" || echo "No changes to commit"
+          git tag -a "${{ steps.previoustag.outputs.next_version }}" -m "Version ${{ steps.previoustag.outputs.next_version }}"
 
       - name: Push changes
         uses: ad-m/github-push-action@master
