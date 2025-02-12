@@ -22,9 +22,9 @@ class RestartServerCommand extends Command
         $serverId = $this->getServerId();
 
         try {
-            $restartServerResponse = $this->ploi->restartServer($serverId);
+            $restartServerResponse = $this->ploi->restartServer($serverId)['data'];
 
-            $this->success($restartServerResponse['message']);
+            $this->success($restartServerResponse[0]['message']);
         } catch (\Exception $e) {
             $this->error($e->getMessage());
         }
