@@ -97,7 +97,7 @@ class PloiAPI
         $errorMessage = "\033[31m ==> \033[0m\033[1;37m";
 
         if ($error === "Unauthenticated.") {
-            $errorMessage .= "The given API key is incorrect. Use 'ploi:token --force' to set a new one.";
+            $errorMessage .= "The given API key is incorrect. Use 'ploi token --force' to set a new one.";
         } elseif (is_string($error)) {
             $errorMessage .= $error;
         } elseif (is_array($error)) {
