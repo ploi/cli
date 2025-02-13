@@ -7,6 +7,7 @@ use App\Commands\Concerns\InteractWithServer;
 use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
+
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
@@ -19,6 +20,7 @@ class RequestCertificateTenantCommand extends BaseCommand
     protected $description = 'Request an SSL certificate for a tenant';
 
     protected array $site;
+
     protected array $server;
 
     public function handle(): void
@@ -33,17 +35,19 @@ class RequestCertificateTenantCommand extends BaseCommand
 
         if (empty($tenants['tenants'])) {
             $this->warn("No tenants found for site {$tenants['main']}.");
+
             return;
         }
 
         $tenant = $this->option('tenant');
-        if (!$tenant) {
+        if (! $tenant) {
             $tenant = select(
                 'Select a tenant to request certificate for:',
                 $tenants['tenants']
             );
-        } elseif (!in_array($tenant, $tenants['tenants'])) {
+        } elseif (! in_array($tenant, $tenants['tenants'])) {
             $this->error("Tenant '{$tenant}' not found.");
+
             return;
         }
 
@@ -68,7 +72,7 @@ class RequestCertificateTenantCommand extends BaseCommand
                 placeholder: 'https://example.com/webhook',
                 validate: fn (string $value) => match (true) {
                     strlen($value) <= 0 => 'Please enter a webhook URL.',
-                    !filter_var($value, FILTER_VALIDATE_URL) => 'Please enter a valid URL.',
+                    ! filter_var($value, FILTER_VALIDATE_URL) => 'Please enter a valid URL.',
                     default => null,
                 }
             );
@@ -81,23 +85,24 @@ class RequestCertificateTenantCommand extends BaseCommand
 
             if (isset($response['data'][0]['message']) && str_contains($response['data'][0]['message'], "Let's Encrypt certificate request has been issued")) {
                 $this->success("Certificate request initiated for tenant: {$tenant}");
-                $this->info("Domains included: " . $params['domains']);
+                $this->info('Domains included: '.$params['domains']);
                 if (isset($params['webhook'])) {
                     $this->info("Webhook will be triggered at: {$params['webhook']}");
                 }
             } else {
-                $this->error("Failed to request certificate: " . ($response['data'][0]['message'] ?? 'Unknown error'));
+                $this->error('Failed to request certificate: '.($response['data'][0]['message'] ?? 'Unknown error'));
             }
         } catch (\Exception $e) {
             $this->error("Error requesting certificate: {$e->getMessage()}");
         }
     }
 
-    function validateDomains(string $value): ?string {
+    public function validateDomains(string $value): ?string
+    {
         $domains = array_map('trim', explode(',', $value));
 
         foreach ($domains as $domain) {
-            if (!preg_match('/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/', $domain)) {
+            if (! preg_match('/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/', $domain)) {
                 return "Invalid domain format: '$domain'. Please use format like example.com";
             }
         }

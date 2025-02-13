@@ -9,9 +9,9 @@ trait DomainSuggestions
     /**
      * Get domain suggestions based on user input with interactive selection
      *
-     * @param string $input User input domain
-     * @param array $availableDomains List of available domains
-     * @param int $maxSuggestions Maximum number of suggestions to return
+     * @param  string  $input  User input domain
+     * @param  array  $availableDomains  List of available domains
+     * @param  int  $maxSuggestions  Maximum number of suggestions to return
      * @return string|null Selected domain or null if no selection made
      */
     protected function getDomainSuggestionsWithSelection(string $input, array $availableDomains, int $maxSuggestions = 5): ?string
@@ -24,12 +24,12 @@ trait DomainSuggestions
             if ($similarity > 0.6) {
                 $suggestions[] = [
                     'domain' => $domain,
-                    'similarity' => $similarity
+                    'similarity' => $similarity,
                 ];
             }
         }
 
-        usort($suggestions, fn($a, $b) => $b['similarity'] <=> $a['similarity']);
+        usort($suggestions, fn ($a, $b) => $b['similarity'] <=> $a['similarity']);
         $suggestions = array_slice($suggestions, 0, $maxSuggestions);
 
         if (empty($suggestions)) {

@@ -8,10 +8,8 @@ use Symfony\Component\Yaml\Yaml;
 
 class Configuration
 {
-    /** @var array */
     protected array $configs = [];
 
-    /** @var array */
     protected array $configFiles = [
         'settings' => 'settings.yml',
         'provision' => 'provision.yml',
@@ -21,7 +19,7 @@ class Configuration
     {
         foreach ($this->configFiles as $type => $file) {
             try {
-                $content = Yaml::parseFile(getcwd() . '/.ploi/' . $file);
+                $content = Yaml::parseFile(getcwd().'/.ploi/'.$file);
                 // Extract the inner content if it's wrapped in a type key
                 $this->configs[$type] = $content[$type] ?? $content;
             } catch (Exception $e) {
@@ -36,7 +34,7 @@ class Configuration
         $this->configs['provision'] = $this->getProvisionFormat();
 
         foreach ($this->configFiles as $type => $file) {
-            $this->store($path . '/.ploi/' . $file, $type);
+            $this->store($path.'/.ploi/'.$file, $type);
         }
     }
 
@@ -60,12 +58,12 @@ class Configuration
     public function store(string $configFile, string $type): void
     {
         $directory = dirname($configFile);
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
 
         $wrappedConfig = [
-            $type => $this->configs[$type]
+            $type => $this->configs[$type],
         ];
 
         $configContent = Yaml::dump(
@@ -86,20 +84,21 @@ class Configuration
         }
 
         $parts = explode('.', $key, 2);
-        if (count($parts) !== 2 || !isset($this->configFiles[$parts[0]])) {
+        if (count($parts) !== 2 || ! isset($this->configFiles[$parts[0]])) {
             throw new \InvalidArgumentException(
                 "Key must be a valid config type or start with valid config type (e.g., 'settings', 'settings.server', 'provision.commands')"
             );
         }
 
         [$type, $key] = $parts;
+
         return Arr::get($this->configs[$type], $key, $default);
     }
 
     public function set(string $key, $value): void
     {
         $parts = explode('.', $key, 2);
-        if (count($parts) !== 2 || !isset($this->configFiles[$parts[0]])) {
+        if (count($parts) !== 2 || ! isset($this->configFiles[$parts[0]])) {
             throw new \InvalidArgumentException(
                 "Key must start with valid config type (e.g., 'settings.server', 'provision.commands')"
             );
@@ -113,7 +112,7 @@ class Configuration
     {
         $this->configFiles[$type] = $filename;
         try {
-            $content = Yaml::parseFile(getcwd() . '/.ploi/' . $filename);
+            $content = Yaml::parseFile(getcwd().'/.ploi/'.$filename);
             // Extract the inner content if it's wrapped in a type key
             $this->configs[$type] = $content[$type] ?? $content;
         } catch (Exception $e) {

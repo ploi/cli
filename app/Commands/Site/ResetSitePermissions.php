@@ -8,9 +8,6 @@ use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
 
-use function Laravel\Prompts\confirm;
-use function Laravel\Prompts\text;
-
 class ResetSitePermissions extends BaseCommand
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;

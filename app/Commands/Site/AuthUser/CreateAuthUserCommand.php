@@ -7,8 +7,9 @@ use App\Commands\Concerns\InteractWithServer;
 use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
-use function Laravel\Prompts\text;
+
 use function Laravel\Prompts\password;
+use function Laravel\Prompts\text;
 
 class CreateAuthUserCommand extends BaseCommand
 {
@@ -30,7 +31,7 @@ class CreateAuthUserCommand extends BaseCommand
             validate: fn (string $value) => match (true) {
                 strlen($value) < 2 => 'Username must be at least 2 characters long.',
                 strlen($value) > 255 => 'Username cannot exceed 255 characters.',
-                !preg_match('/^[a-zA-Z0-9_-]+$/', $value) => 'Username can only contain letters, numbers, underscores, and hyphens.',
+                ! preg_match('/^[a-zA-Z0-9_-]+$/', $value) => 'Username can only contain letters, numbers, underscores, and hyphens.',
                 default => null,
             }
         );
@@ -48,7 +49,7 @@ class CreateAuthUserCommand extends BaseCommand
         $path = text(
             label: 'Enter the protected path (optional):',
             validate: fn (string $value) => match (true) {
-                strlen($value) > 0 && !preg_match('/^\/.*$/', $value) => 'Path must start with a forward slash (/).',
+                strlen($value) > 0 && ! preg_match('/^\/.*$/', $value) => 'Path must start with a forward slash (/).',
                 strlen($value) > 255 => 'Path cannot exceed 255 characters.',
                 default => null,
             }

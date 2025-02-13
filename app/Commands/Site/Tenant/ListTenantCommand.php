@@ -7,6 +7,7 @@ use App\Commands\Concerns\InteractWithServer;
 use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
+
 use function Laravel\Prompts\confirm;
 
 class ListTenantCommand extends BaseCommand
@@ -34,12 +35,13 @@ class ListTenantCommand extends BaseCommand
         if (empty($tenants['tenants'])) {
             $this->warn("No tenants found for site {$tenants['main']}.");
 
-            if (confirm("Would you like to create a tenant?", 'yes')) {
+            if (confirm('Would you like to create a tenant?', 'yes')) {
                 $this->call('tenant:create', [
                     '--server' => $this->option('server') ?? $this->server['name'],
                     '--site' => $this->option('site') ?? $this->site['domain'],
                 ]);
             }
+
             return;
         }
 
@@ -47,7 +49,7 @@ class ListTenantCommand extends BaseCommand
 
         $headers = ['Tenants'];
         $rows = collect($tenants['tenants'])->map(fn ($tenant) => [
-            $tenant
+            $tenant,
         ])->toArray();
 
         $this->table($headers, $rows);

@@ -22,7 +22,6 @@ class ListSiteCommand extends BaseCommand
         $serverId = $this->getServerId();
         $sites = $this->ploi->getSiteList($serverId)['data'];
 
-
         //             "id": 1,
         //            "status": "active",
         //            "server_id": 146,

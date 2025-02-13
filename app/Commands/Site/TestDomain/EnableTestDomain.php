@@ -28,14 +28,15 @@ class EnableTestDomain extends BaseCommand
         [$serverId, $siteId] = $this->getServerAndSite();
         $this->site = $this->ploi->getSiteDetails($serverId, $siteId)['data'];
 
-        if($this->site['test_domain']) {
+        if ($this->site['test_domain']) {
             $this->warn("{$this->site['domain']} already has a test domain enabled!");
             $this->info("Test domain: {$this->site['test_domain']}");
             $disable = confirm('Do you want to disable it?');
-            if($disable) {
+            if ($disable) {
                 $this->ploi->disableTestDomain($serverId, $siteId)['data'];
                 $this->success('Test domain has been disabled!');
             }
+
             return;
         }
 
@@ -50,7 +51,7 @@ class EnableTestDomain extends BaseCommand
                 );
 
                 $data = $response['data'];
-                if (!empty($data['test_domain'])) {
+                if (! empty($data['test_domain'])) {
                     $this->info($data['test_domain']);
                     break;
                 }
@@ -58,6 +59,7 @@ class EnableTestDomain extends BaseCommand
                 sleep(2);
             } catch (\Throwable $e) {
                 sleep(2);
+
                 continue;
             }
         }

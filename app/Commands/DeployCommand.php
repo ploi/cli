@@ -8,8 +8,6 @@ use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
 use Illuminate\Support\Arr;
 
-use Symfony\Component\Yaml\Exception\ParseException;
-use Symfony\Component\Yaml\Yaml;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\spin;
 
@@ -62,7 +60,7 @@ class DeployCommand extends Command
 
     protected function validateScheduleDatetime(string $datetime): void
     {
-        if (!preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}$/', $datetime)) {
+        if (! preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}$/', $datetime)) {
             $this->error('Please provide a valid datetime in the format: YYYY-MM-DD HH:MM.');
             exit(1);
         }

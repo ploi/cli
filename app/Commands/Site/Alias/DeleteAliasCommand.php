@@ -50,12 +50,12 @@ class DeleteAliasCommand extends Command
             $this->warn('!! This action is irreversible !!');
 
             $confirm = $this->option('force') || text(
-                    label: 'Type the alias name to confirm deletion: '.$aliasName,
-                    validate: fn (string $value) => match (true) {
-                        $value !== $aliasName => 'The alias name does not match.',
-                        default => null,
-                    }
-                );
+                label: 'Type the alias name to confirm deletion: '.$aliasName,
+                validate: fn (string $value) => match (true) {
+                    $value !== $aliasName => 'The alias name does not match.',
+                    default => null,
+                }
+            );
 
             if (! $confirm) {
                 $this->info('Alias deletion aborted.');

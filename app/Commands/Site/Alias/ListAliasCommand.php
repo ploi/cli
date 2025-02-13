@@ -7,6 +7,7 @@ use App\Commands\Concerns\InteractWithServer;
 use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
+
 use function Laravel\Prompts\confirm;
 
 class ListAliasCommand extends BaseCommand
@@ -34,12 +35,13 @@ class ListAliasCommand extends BaseCommand
         if (empty($alias['aliases'])) {
             $this->warn("No aliases found for site {$alias['main']}.");
 
-            if (confirm("Would you like to create a alias?", 'yes')) {
+            if (confirm('Would you like to create a alias?', 'yes')) {
                 $this->call('alias:create', [
                     '--server' => $this->option('server') ?? $this->server['name'],
                     '--site' => $this->option('site') ?? $this->site['domain'],
                 ]);
             }
+
             return;
         }
 
@@ -47,7 +49,7 @@ class ListAliasCommand extends BaseCommand
 
         $headers = ['Alias'];
         $rows = collect($alias['aliases'])->map(fn ($alias) => [
-            $alias
+            $alias,
         ])->toArray();
 
         $this->table($headers, $rows);

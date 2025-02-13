@@ -96,7 +96,7 @@ class PloiAPI
 
         $errorMessage = "\033[31m ==> \033[0m\033[1;37m";
 
-        if ($error === "Unauthenticated.") {
+        if ($error === 'Unauthenticated.') {
             $errorMessage .= "The given API key is incorrect. Use 'ploi token --force' to set a new one.";
         } elseif (is_string($error)) {
             $errorMessage .= $error;
@@ -107,7 +107,7 @@ class PloiAPI
             }
         }
 
-        exit($errorMessage . "\033[0m\n");
+        exit($errorMessage."\033[0m\n");
     }
 
     private function mergeResponseData(array $existing, array $new): array

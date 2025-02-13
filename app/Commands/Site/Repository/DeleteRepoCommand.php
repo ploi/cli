@@ -9,7 +9,6 @@ use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
 
 use function Laravel\Prompts\error;
-use function Laravel\Prompts\select;
 use function Laravel\Prompts\spin;
 
 class DeleteRepoCommand extends Command

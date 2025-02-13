@@ -7,7 +7,7 @@ use App\Commands\Concerns\InteractWithServer;
 use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
-use function Laravel\Prompts\confirm;
+
 use function Laravel\Prompts\text;
 
 class CreateAliasCommand extends BaseCommand
@@ -37,20 +37,21 @@ class CreateAliasCommand extends BaseCommand
         $alias = explode(',', $alias);
 
         $data = $this->ploi->createAlias($serverId, $siteId, [
-            'aliases' => $alias
+            'aliases' => $alias,
         ]);
 
-        if($data){
+        if ($data) {
             $this->success('Alias created successfully');
         }
 
     }
 
-    function validateDomains(string $value): ?string {
+    public function validateDomains(string $value): ?string
+    {
         $domains = array_map('trim', explode(',', $value));
 
         foreach ($domains as $domain) {
-            if (!preg_match('/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/', $domain)) {
+            if (! preg_match('/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/', $domain)) {
                 return "Invalid domain format: '$domain'. Please use format like example.com";
             }
         }

@@ -7,6 +7,7 @@ use App\Commands\Concerns\InteractWithServer;
 use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
+
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
@@ -19,6 +20,7 @@ class RevokeCertificateTenantCommand extends BaseCommand
     protected $description = 'Revoke an SSL certificate for a tenant';
 
     protected array $site;
+
     protected array $server;
 
     public function handle(): void
@@ -33,17 +35,19 @@ class RevokeCertificateTenantCommand extends BaseCommand
 
         if (empty($tenants['tenants'])) {
             $this->warn("No tenants found for site {$tenants['main']}.");
+
             return;
         }
 
         $tenant = $this->option('tenant');
-        if (!$tenant) {
+        if (! $tenant) {
             $tenant = select(
                 'Select a tenant to revoke certificate for:',
                 $tenants['tenants']
             );
-        } elseif (!in_array($tenant, $tenants['tenants'])) {
+        } elseif (! in_array($tenant, $tenants['tenants'])) {
             $this->error("Tenant '{$tenant}' not found.");
+
             return;
         }
 
@@ -54,7 +58,7 @@ class RevokeCertificateTenantCommand extends BaseCommand
                 placeholder: 'https://example.com/webhook',
                 validate: fn (string $value) => match (true) {
                     strlen($value) <= 0 => 'Please enter a webhook URL.',
-                    !filter_var($value, FILTER_VALIDATE_URL) => 'Please enter a valid URL.',
+                    ! filter_var($value, FILTER_VALIDATE_URL) => 'Please enter a valid URL.',
                     default => null,
                 }
             );
@@ -65,13 +69,13 @@ class RevokeCertificateTenantCommand extends BaseCommand
         try {
             $response = $this->ploi->revokeCertificateTenant($serverId, $siteId, $tenant, $params);
 
-            if (isset($response['data'][0]['message']) && str_contains($response['data'][0]['message'], "certificate has been revoked")) {
+            if (isset($response['data'][0]['message']) && str_contains($response['data'][0]['message'], 'certificate has been revoked')) {
                 $this->success("Certificate successfully revoked for tenant: {$tenant}");
                 if (isset($params['webhook'])) {
                     $this->info("Webhook will be triggered at: {$params['webhook']}");
                 }
             } else {
-                $this->error("Failed to revoke certificate: " . ($response['data'][0]['message'] ?? 'Unknown error'));
+                $this->error('Failed to revoke certificate: '.($response['data'][0]['message'] ?? 'Unknown error'));
             }
         } catch (\Exception $e) {
             $this->error("Error revoking certificate: {$e->getMessage()}");

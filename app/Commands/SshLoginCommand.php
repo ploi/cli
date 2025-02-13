@@ -49,7 +49,7 @@ class SshLoginCommand extends Command
             return $this->option('user');
         }
 
-        if (!empty($this->site)) {
+        if (! empty($this->site)) {
             return $this->site['system_user'];
         }
 

@@ -10,12 +10,11 @@ use App\Traits\EnsureHasToken;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\form;
 use function Laravel\Prompts\select;
-use function Laravel\Prompts\spin;
 use function Laravel\Prompts\text;
 
 class CreateServerCommand extends Command
 {
-    use EnsureHasToken, InteractWithUser, InteractWithServer;
+    use EnsureHasToken, InteractWithServer, InteractWithUser;
 
     protected $signature = 'server:create {--custom}';
 

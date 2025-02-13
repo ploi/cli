@@ -9,7 +9,6 @@ use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
 
 use function Laravel\Prompts\confirm;
-use function Laravel\Prompts\text;
 
 class DisableTestDomain extends BaseCommand
 {
@@ -28,16 +27,17 @@ class DisableTestDomain extends BaseCommand
         [$serverId, $siteId] = $this->getServerAndSite();
         $this->site = $this->ploi->getSiteDetails($serverId, $siteId)['data'];
 
-        if(!$this->site['test_domain']) {
+        if (! $this->site['test_domain']) {
             $this->warn("{$this->site['domain']} does not have a test domain enabled!");
             $enable = confirm('Do you want to enable it?');
-            if($enable) {
+            if ($enable) {
                 $data = $this->ploi->enableTestDomain($serverId, $siteId)['data'];
                 $this->success('Test domain has been enabled!');
-                if(isset($data['test_domain_url'])) {
+                if (isset($data['test_domain_url'])) {
                     $this->line($data['test_domain_url']);
                 }
             }
+
             return;
         }
 

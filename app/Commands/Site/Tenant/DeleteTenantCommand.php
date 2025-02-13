@@ -50,12 +50,12 @@ class DeleteTenantCommand extends Command
             $this->warn('!! This action is irreversible !!');
 
             $confirm = $this->option('force') || text(
-                    label: 'Type the tenant name to confirm deletion: '.$tenantName,
-                    validate: fn (string $value) => match (true) {
-                        $value !== $tenantName => 'The tenant name does not match.',
-                        default => null,
-                    }
-                );
+                label: 'Type the tenant name to confirm deletion: '.$tenantName,
+                validate: fn (string $value) => match (true) {
+                    $value !== $tenantName => 'The tenant name does not match.',
+                    default => null,
+                }
+            );
 
             if (! $confirm) {
                 $this->info('Tenant deletion aborted.');

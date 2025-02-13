@@ -6,6 +6,7 @@ use App\Commands\Command as BaseCommand;
 use App\Commands\Concerns\InteractWithServer;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
+
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\multiselect;
 
@@ -24,11 +25,13 @@ class ListInsightsCommand extends BaseCommand
 
         if ($fixId = $this->option('fix')) {
             $this->fixInsight($serverId, $fixId);
+
             return;
         }
 
         if ($ignoreId = $this->option('ignore')) {
             $this->ignoreInsight($serverId, $ignoreId);
+
             return;
         }
 
@@ -49,12 +52,13 @@ class ListInsightsCommand extends BaseCommand
         $fixableInsights = collect($insights)
             ->filter(fn ($insight) => $insight['is_fixable'])
             ->mapWithKeys(fn ($insight) => [
-                $insight['id'] => '[' . $insight['id'] . '] ' . $insight['description']
+                $insight['id'] => '['.$insight['id'].'] '.$insight['description'],
             ])
             ->toArray();
 
         if (empty($fixableInsights)) {
             $this->info('No fixable insights available.');
+
             return;
         }
 
@@ -76,7 +80,7 @@ class ListInsightsCommand extends BaseCommand
             $this->ploi->fixInsight($serverId, $insightId);
             $this->success("Insight {$insightId} is being processed!");
         } catch (\Exception $e) {
-            $this->error("Failed to fix insight {$insightId}: " . $e->getMessage());
+            $this->error("Failed to fix insight {$insightId}: ".$e->getMessage());
         }
     }
 
@@ -86,7 +90,7 @@ class ListInsightsCommand extends BaseCommand
             $this->ploi->ignoreInsight($serverId, $insightId);
             $this->success("Insight {$insightId} has been ignored!");
         } catch (\Exception $e) {
-            $this->error("Failed to ignore insight {$insightId}: " . $e->getMessage());
+            $this->error("Failed to ignore insight {$insightId}: ".$e->getMessage());
         }
     }
 }

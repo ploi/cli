@@ -85,5 +85,4 @@ class CreateDaemonCommand extends BaseCommand
 
         $this->success('Daemon created successfully.');
     }
-
 }

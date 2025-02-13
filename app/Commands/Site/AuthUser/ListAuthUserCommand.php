@@ -7,6 +7,7 @@ use App\Commands\Concerns\InteractWithServer;
 use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
+
 use function Laravel\Prompts\confirm;
 
 class ListAuthUserCommand extends BaseCommand
@@ -34,12 +35,13 @@ class ListAuthUserCommand extends BaseCommand
         if (empty($authUsers)) {
             $this->warn("No basic auth users found for site {$this->site['domain']}.");
 
-            if (confirm("Would you like to create a auth user?", 'yes')) {
+            if (confirm('Would you like to create a auth user?', 'yes')) {
                 $this->call('auth-user:create', [
                     '--server' => $this->option('server') ?? $this->server['name'],
                     '--site' => $this->option('site') ?? $this->site['domain'],
                 ]);
             }
+
             return;
         }
 

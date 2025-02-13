@@ -43,7 +43,7 @@ class DeleteAuthUserCommand extends Command
                 $id = select(
                     label: 'Select the authentication user to delete:',
                     options: collect($authUsers)->mapWithKeys(fn ($user) => [
-                        $user['id'] => "[{$user['id']}] {$user['name']} ({$user['path']})"
+                        $user['id'] => "[{$user['id']}] {$user['name']} ({$user['path']})",
                     ])->toArray(),
                     validate: fn ($value) => ! empty($value) ? null : 'User selection is required.',
                 );
@@ -52,9 +52,9 @@ class DeleteAuthUserCommand extends Command
             $this->warn('!! This action is irreversible !!');
 
             $confirm = $this->option('force') || confirm(
-                    label: 'Are you sure you want to delete this authentication user?',
-                    default: false
-                );
+                label: 'Are you sure you want to delete this authentication user?',
+                default: false
+            );
 
             if (! $confirm) {
                 $this->info('Authentication user deletion aborted.');

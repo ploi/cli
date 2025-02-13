@@ -7,7 +7,7 @@ use App\Commands\Concerns\InteractWithServer;
 use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
-use function Laravel\Prompts\confirm;
+
 use function Laravel\Prompts\text;
 
 class CreateTenantCommand extends BaseCommand
@@ -37,20 +37,21 @@ class CreateTenantCommand extends BaseCommand
         $tenants = explode(',', $tenants);
 
         $data = $this->ploi->createTenant($serverId, $siteId, [
-            'tenants' => $tenants
+            'tenants' => $tenants,
         ]);
 
-        if($data){
+        if ($data) {
             $this->success('Tenants created successfully');
         }
 
     }
 
-    function validateDomains(string $value): ?string {
+    public function validateDomains(string $value): ?string
+    {
         $domains = array_map('trim', explode(',', $value));
 
         foreach ($domains as $domain) {
-            if (!preg_match('/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/', $domain)) {
+            if (! preg_match('/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/', $domain)) {
                 return "Invalid domain format: '$domain'. Please use format like example.com";
             }
         }

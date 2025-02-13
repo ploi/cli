@@ -83,5 +83,4 @@ class CreateRedirectCommand extends BaseCommand
 
         $this->console($statusCheck['message'], $statusCheck['type']);
     }
-
 }
