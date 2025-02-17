@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use App\Commands\TokenCommand;
+
 trait EnsureHasToken
 {
     protected function hasToken(): bool
@@ -11,15 +13,15 @@ trait EnsureHasToken
         }
 
         $token = config('ploi.token');
-
-        return ! empty($token);
+        return !empty($token);
     }
 
     protected function ensureHasToken()
     {
-        if (! $this->hasToken()) {
-            $this->info('Please set your ploi api token first.');
-            $this->call('ploi:token');
+        if (!$this->hasToken()) {
+            $this->info('Please set your Ploi API token first.');
+            $this->call(TokenCommand::class);
+
             exit(1);
         }
 

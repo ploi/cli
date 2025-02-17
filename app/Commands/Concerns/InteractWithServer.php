@@ -2,7 +2,7 @@
 
 namespace App\Commands\Concerns;
 
-use function Laravel\Prompts\select;
+use function Laravel\Prompts\search;
 use function Laravel\Prompts\spin;
 
 trait InteractWithServer
@@ -16,12 +16,13 @@ trait InteractWithServer
             exit(1);
         }
 
-        return select(
-            'Select a server:',
-            collect($servers)
+        return search(
+            label: 'Select a server:',
+            options: fn($search) => collect($servers)
                 ->mapWithKeys(fn ($server) => [
                     $server['name'] => $server['name'].' ('.$server['ip_address'].')',
                 ])
+                ->filter(fn($name) => str_contains($name, $search))
                 ->toArray(),
             scroll: 10
         );
