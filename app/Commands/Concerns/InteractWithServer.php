@@ -18,11 +18,11 @@ trait InteractWithServer
 
         return search(
             label: 'Select a server:',
-            options: fn($search) => collect($servers)
+            options: fn ($search) => collect($servers)
                 ->mapWithKeys(fn ($server) => [
                     $server['name'] => $server['name'].' ('.$server['ip_address'].')',
                 ])
-                ->filter(fn($name) => str_contains($name, $search))
+                ->filter(fn ($name) => str_contains($name, $search))
                 ->toArray(),
             scroll: 10
         );
