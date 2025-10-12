@@ -110,13 +110,19 @@ class PloiAPI
         exit($errorMessage."\033[0m\n");
     }
 
-    private function mergeResponseData(array $existing, array $new): array
+    private function mergeResponseData(array $existing, mixed $new): array
     {
         if (empty($new)) {
             return $existing;
         }
 
-        $newData = $new['data'] ?? [$new];
+        if (!is_array($new)) {
+            $new = [$new];
+        }
+
+        $newData = (isset($new['data']) && is_array($new['data']))
+            ? $new['data']
+            : $new;
 
         return array_merge($existing, $newData);
     }
