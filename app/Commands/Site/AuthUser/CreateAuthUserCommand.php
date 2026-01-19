@@ -58,7 +58,7 @@ class CreateAuthUserCommand extends BaseCommand
         $data = $this->ploi->createAuthUser($serverId, $siteId, [
             'name' => $name,
             'password' => $password,
-            'path' => $path ?: '/',
+            'path' => $path,
         ]);
 
         if ($data) {
