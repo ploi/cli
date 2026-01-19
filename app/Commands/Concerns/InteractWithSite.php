@@ -13,8 +13,8 @@ trait InteractWithSite
     protected function getServerAndSite(): array
     {
         if ($this->hasPloiConfigurationFile() &&
-            !$this->option('server') &&
-            !$this->option('site')) {
+            ! $this->option('server') &&
+            ! $this->option('site')) {
             $serverId = $this->configuration->get('settings.server');
             $siteId = $this->configuration->get('settings.site');
         } else {
@@ -27,7 +27,7 @@ trait InteractWithSite
             $siteId = $this->getSiteIdByDomain($serverId, $siteIdentifier);
         }
 
-        if (!$serverId || !$siteId) {
+        if (! $serverId || ! $siteId) {
             $this->error('Server and site must be valid.');
             exit(1);
         }
@@ -42,8 +42,8 @@ trait InteractWithSite
 
         $domain = search(
             label: 'Select a site by domain:',
-            options: fn(string $search) => $sites
-                ->filter(fn($name) => str_contains($name, $search))
+            options: fn (string $search) => $sites
+                ->filter(fn ($name) => str_contains($name, $search))
                 ->toArray(),
             scroll: 10
         );
@@ -58,7 +58,7 @@ trait InteractWithSite
 
         $site = $sites->first(fn ($site) => $site['domain'] === $domain);
 
-        if (!$site) {
+        if (! $site) {
             $selectedDomain = $this->getDomainSuggestionsWithSelection($domain, $availableDomains);
 
             if ($selectedDomain) {

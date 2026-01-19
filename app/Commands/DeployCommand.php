@@ -4,8 +4,10 @@ namespace App\Commands;
 
 use App\Commands\Concerns\InteractWithServer;
 use App\Commands\Concerns\InteractWithSite;
+use App\Services\DeploymentLogPoller;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
+use Exception;
 use Illuminate\Support\Arr;
 
 use function Laravel\Prompts\confirm;
@@ -15,9 +17,9 @@ class DeployCommand extends Command
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 
-    protected $signature = 'deploy {--server=} {--site=} {--schedule=}';
+    protected $signature = 'deploy {--server=} {--site=} {--schedule=} {--stream : Stream deployment logs in real-time} {--deployment-id= : Specific deployment ID to stream}';
 
-    protected $description = 'Deploy your site to Ploi.io.';
+    protected $description = 'Deploy your site to Ploi.io with optional log streaming.';
 
     protected array $site = [];
 
@@ -56,6 +58,17 @@ class DeployCommand extends Command
         }
 
         $this->deploy($serverId, $siteId, $this->site['domain'], $data, $isScheduled);
+
+        // Handle streaming after deployment
+        if ($this->option('stream') && ! $isScheduled) {
+            $deploymentId = $this->option('deployment-id') ?? $this->getLatestDeploymentId($serverId, $siteId);
+
+            if ($deploymentId) {
+                $this->streamDeploymentLogs($serverId, $siteId, $deploymentId);
+            } else {
+                $this->error('No deployment found to stream');
+            }
+        }
     }
 
     protected function validateScheduleDatetime(string $datetime): void
@@ -128,10 +141,98 @@ class DeployCommand extends Command
 
         // Handle the deployment result
         match ($status['status']) {
-            'active' => $this->success("Deployment completed successfully. Site is live on: {$status['domain']}"),
-            'deploy-failed' => $this->error('Your recent deployment has failed, please check recent deploy log for errors.'),
+            'active' => $this->handleSuccessfulDeployment($serverId, $siteId, $status['domain']),
+            'deploy-failed' => $this->handleFailedDeployment($serverId, $siteId),
             'timeout' => $this->warn('Deployment status check timed out. Please check manually.'),
             default => $this->warn('Deployment status is unknown. Please check manually.')
         };
+    }
+
+    /**
+     * Stream deployment logs in real-time
+     *
+     * @return void
+     */
+    private function streamDeploymentLogs(int $serverId, int $siteId, int $deploymentId)
+    {
+        $this->info('🔄 Streaming deployment logs...');
+        $this->newLine();
+
+        $poller = new DeploymentLogPoller(config('ploi.token'));
+
+        try {
+            $poller->pollDeploymentLogs($serverId, $siteId, $deploymentId, function ($line) {
+                // Format the log line with timestamp
+                $timestamp = now()->format('H:i:s');
+                $this->line("<fg=gray>[{$timestamp}]</fg=gray> {$line}");
+            });
+
+            $this->newLine();
+            $this->success('✅ Deployment streaming completed!');
+
+        } catch (Exception $e) {
+            $this->newLine();
+            $this->error('❌ Streaming failed: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Get the latest deployment ID for streaming
+     */
+    private function getLatestDeploymentId(int $serverId, int $siteId): ?int
+    {
+        $poller = new DeploymentLogPoller(config('ploi.token'));
+
+        try {
+            $deployment = $poller->getLatestDeployment($serverId, $siteId);
+
+            return $deployment['id'] ?? null;
+        } catch (Exception $e) {
+            $this->error('Failed to get latest deployment: '.$e->getMessage());
+
+            return null;
+        }
+    }
+
+    /**
+     * Handle successful deployment completion
+     */
+    private function handleSuccessfulDeployment(string $serverId, string $siteId, string $domain): void
+    {
+        $this->success("Deployment completed successfully. Site is live on: {$domain}");
+    }
+
+    /**
+     * Handle failed deployment
+     */
+    private function handleFailedDeployment(string $serverId, string $siteId): void
+    {
+        $this->error('Your recent deployment has failed, please check recent deploy log for errors.');
+
+        // Show link to deployment logs if not streaming
+        if (! $this->option('stream')) {
+            $this->showLogLink($serverId, $siteId);
+        }
+    }
+
+    /**
+     * Show link to deployment logs
+     */
+    private function showLogLink(string $serverId, string $siteId): void
+    {
+        try {
+            // Get the latest deployment log ID
+            $logs = $this->ploi->getSiteLogs($serverId, $siteId, 1)['data'];
+
+            if (! empty($logs)) {
+                $latestLogId = $logs[0]['id'];
+                $logUrl = "https://ploi.io/panel/servers/{$serverId}/sites/{$siteId}/logs/modals/{$latestLogId}";
+
+                $this->line('');
+                $this->info("📋 View deployment logs: {$logUrl}");
+            }
+        } catch (Exception $e) {
+            // Silently fail if we can't get log link - not critical
+        }
     }
 }
