@@ -187,7 +187,7 @@ class DeployCommand extends Command
         try {
             $deployment = $poller->getLatestDeployment($serverId, $siteId);
 
-            return $deployment['id'] ?? null;
+            return isset($deployment['id']) ? (int) $deployment['id'] : null;
         } catch (Exception $e) {
             $this->error('Failed to get latest deployment: '.$e->getMessage());
 
