@@ -99,7 +99,8 @@ class DeployCommand extends Command
             exit();
         }
 
-        $this->info(Arr::first($deploying['data'])['message']);
+        $firstValue = Arr::first($deploying['data']);
+        $this->info(is_array($firstValue) ? $firstValue['message'] : $firstValue);
 
         if ($isScheduled) {
             return;
