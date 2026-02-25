@@ -15,9 +15,9 @@ class PloiAPI
 
     public mixed $headers;
 
-    public function __construct()
+    public function __construct(?string $token = null)
     {
-        $this->apiKey = config('ploi.token');
+        $this->apiKey = $token ?? config('ploi.token');
         $this->apiUrl = Config::get('ploi.api_url');
         $this->headers = [
             'User-Agent' => 'Ploi CLI',
@@ -116,7 +116,7 @@ class PloiAPI
             return $existing;
         }
 
-        if (!is_array($new)) {
+        if (! is_array($new)) {
             $new = [$new];
         }
 
