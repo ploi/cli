@@ -99,7 +99,8 @@ class DeployCommand extends Command
             exit();
         }
 
-        $this->info(Arr::first($deploying['data'])['message']);
+        $firstValue = Arr::first($deploying['data']);
+        $this->info(is_array($firstValue) ? $firstValue['message'] : $firstValue);
 
         if ($isScheduled) {
             return;
@@ -186,7 +187,7 @@ class DeployCommand extends Command
         try {
             $deployment = $poller->getLatestDeployment($serverId, $siteId);
 
-            return $deployment['id'] ?? null;
+            return isset($deployment['id']) ? (int) $deployment['id'] : null;
         } catch (Exception $e) {
             $this->error('Failed to get latest deployment: '.$e->getMessage());
 

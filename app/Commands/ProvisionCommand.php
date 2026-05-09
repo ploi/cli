@@ -29,7 +29,7 @@ class ProvisionCommand extends Command
             $this->warn('You do not own a provision.yml file in your .ploi folder. Please create this file.');
         }
 
-        $this->info('Starting up server creation via the provison.yml file');
+        $this->info('Starting up server creation via the provision.yml file');
 
         $provision = $this->configuration->get('provision');
 

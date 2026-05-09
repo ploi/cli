@@ -16,7 +16,7 @@ abstract class Command extends BaseCommand
     {
         parent::__construct();
 
-        $this->ploi = new PloiAPI;
+        $this->ploi = app(PloiAPI::class);
         $this->configuration = new Configuration;
     }
 

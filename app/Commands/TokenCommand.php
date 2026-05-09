@@ -23,8 +23,8 @@ class TokenCommand extends Command
             return;
         }
 
-        $this->info('Welcome to Ploi.io CLI!');
-        $this->info('Please enter your Ploi.io API token to get started.');
+        $this->info('Welcome to Ploi CLI!');
+        $this->info('Please enter your Ploi API token to get started. Create one here: https://ploi.io/profile/api-keys');
 
         if ($token = $this->option('token')) {
             $this->saveToken($token);
@@ -34,7 +34,7 @@ class TokenCommand extends Command
         }
 
         $token = text(
-            label: 'Please Enter Your Ploi.io Access Token:',
+            label: 'Please Enter Your Ploi Access Token:',
             required: true,
             hint: 'Visit the docs on: https://cli.ploi.io'
         );
