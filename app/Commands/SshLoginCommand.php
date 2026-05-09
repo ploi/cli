@@ -3,56 +3,63 @@
 namespace App\Commands;
 
 use App\Commands\Concerns\InteractWithServer;
-use App\Commands\Concerns\InteractWithSite;
 use App\Traits\EnsureHasToken;
 use App\Traits\HasPloiConfiguration;
 use Illuminate\Support\Facades\Process;
 
-use function Laravel\Prompts\text;
+use function Laravel\Prompts\search;
 
 class SshLoginCommand extends Command
 {
-    use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
+    use EnsureHasToken, HasPloiConfiguration, InteractWithServer;
 
-    protected $signature = 'ssh {--server=} {--site=} {--u|user=}';
+    protected $signature = 'ssh {--server=} {--u|user=}';
 
     protected $description = 'Login to your server via SSH';
-
-    protected array $server = [];
-
-    protected array $site = [];
 
     public function handle(): void
     {
         $this->ensureHasToken();
 
-        [$serverId, $siteId] = $this->getServerAndSite();
+        $serverId = $this->getServerId();
+        $server = $this->ploi->getServerDetails($serverId)['data'];
 
-        $this->server = $this->ploi->getServerDetails($serverId)['data'];
-        $this->site = $this->ploi->getSiteDetails($serverId, $siteId)['data'];
+        $user = $this->option('user') ?? $this->selectSystemUser($serverId);
 
-        $user = $this->determineUser();
-        $user = text(
-            label: 'Enter the username you want to login with',
-            default: $user,
-            required: true
-        );
+        $this->info("Logging in to {$server['name']} as {$user}");
 
-        $this->info("Logging in to {$this->server['name']} as {$user}");
-
-        Process::forever()->tty()->run("ssh {$user}@{$this->server['ip_address']}");
+        Process::forever()->tty()->run("ssh {$user}@{$server['ip_address']}");
     }
 
-    protected function determineUser(): string
+    protected function selectSystemUser(int $serverId): string
     {
-        if ($this->option('user')) {
-            return $this->option('user');
-        }
+        $userNames = collect($this->ploi->getSystemUsers($serverId)['data'] ?? [])
+            ->pluck('name')
+            ->prepend('ploi')
+            ->unique()
+            ->values();
 
-        if (! empty($this->site)) {
-            return $this->site['system_user'];
-        }
+        $sitesByUser = collect($this->ploi->getSiteList($serverId)['data'] ?? [])
+            ->groupBy('system_user');
 
-        return text(label: 'Enter the username you want to login with', default: 'ploi');
+        $options = $userNames->mapWithKeys(function (string $name) use ($sitesByUser) {
+            $domains = $sitesByUser->get($name, collect())
+                ->pluck('domain')
+                ->implode(', ');
+
+            $label = $domains !== ''
+                ? "$name ($domains)"
+                : $name;
+
+            return [$name => $label];
+        })->toArray();
+
+        return search(
+            label: 'Select a system user:',
+            options: fn (string $value) => collect($options)
+                ->filter(fn ($label) => str_contains(strtolower($label), strtolower($value)))
+                ->toArray(),
+            scroll: 10
+        );
     }
 }
