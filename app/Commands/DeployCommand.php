@@ -17,7 +17,7 @@ class DeployCommand extends Command
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 
-    protected $signature = 'deploy {--server=} {--site=} {--schedule=} {--stream : Stream deployment logs in real-time}';
+    protected $signature = 'deploy {--server=} {--site=} {--schedule=} {--no-stream : Disable real-time deployment log streaming}';
 
     protected $description = 'Deploy your site to Ploi.io with optional log streaming.';
 
@@ -95,13 +95,13 @@ class DeployCommand extends Command
             return;
         }
 
-        if ($this->option('stream')) {
-            $this->streamAndAwait($serverId, $siteId, $domain);
+        if ($this->option('no-stream')) {
+            $this->pollDeploymentStatus($serverId, $siteId, $domain);
 
             return;
         }
 
-        $this->pollDeploymentStatus($serverId, $siteId, $domain);
+        $this->streamAndAwait($serverId, $siteId, $domain);
     }
 
     protected function pollDeploymentStatus(string $serverId, string $siteId, string $domain): void
@@ -156,7 +156,8 @@ class DeployCommand extends Command
             });
         } catch (Exception $e) {
             $this->newLine();
-            $this->error('❌ Streaming failed: '.$e->getMessage());
+            $this->warn('Log streaming failed ('.$e->getMessage().'), falling back to status checks...');
+            $this->pollDeploymentStatus($serverId, $siteId, $domain);
 
             return;
         }
@@ -186,7 +187,7 @@ class DeployCommand extends Command
         $this->error('Your recent deployment has failed, please check recent deploy log for errors.');
 
         // When streaming, the failed log output is already shown inline.
-        if (! $this->option('stream')) {
+        if ($this->option('no-stream')) {
             $this->showLogLink($serverId, $siteId);
         }
     }
