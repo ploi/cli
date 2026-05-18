@@ -3,107 +3,152 @@
 namespace App\Services;
 
 use Exception;
-use Illuminate\Support\Facades\Http;
 
 class DeploymentLogPoller
 {
-    private $apiKey;
+    private const POLL_INTERVAL = 2;
 
-    private $baseUrl;
+    private const MAX_POLL_ATTEMPTS = 300;
 
-    public function __construct(string $apiKey, ?string $baseUrl = null)
-    {
-        $this->apiKey = $apiKey;
-        $this->baseUrl = $baseUrl ?? config('ploi.api_url');
-    }
+    private const MAX_RETRIES = 3;
+
+    private const RETRY_BACKOFF = 5;
+
+    private const FINAL_STATUSES = ['active', 'deploy-failed'];
+
+    public function __construct(private readonly PloiAPI $ploi) {}
 
     /**
-     * Poll deployment logs and stream new lines as they appear
+     * Poll the site endpoint, streaming new lines from `current_deploy_log` as they appear.
      *
-     * @param  callable|null  $onNewLines  Callback for each new log line
+     * Returns the site's final status (`active` / `deploy-failed`), or `null` on timeout.
+     *
+     * @param  callable|null  $onNewLines  Receives each new non-empty log line.
      *
      * @throws Exception
      */
-    public function pollDeploymentLogs(int $serverId, int $siteId, int $deploymentId, ?callable $onNewLines = null): void
+    public function pollDeploymentLogs(int $serverId, int $siteId, ?callable $onNewLines = null): ?string
     {
-        $isActive = true;
         $lastLogPosition = 0;
-        $pollInterval = 2; // seconds
-        $maxRetries = 3;
+        $hadLogContent = false;
         $retryCount = 0;
-        $maxPollAttempts = 300; // 10 minutes at 2-second intervals
         $pollAttempts = 0;
 
-        while ($isActive && $pollAttempts < $maxPollAttempts) {
+        while ($pollAttempts < self::MAX_POLL_ATTEMPTS) {
             try {
-                $response = $this->getDeploymentLog($serverId, $siteId, $deploymentId);
+                $site = $this->ploi->getSiteDetails($serverId, $siteId)['data'] ?? null;
 
-                if ($response && isset($response['content'])) {
-                    $newLines = $this->extractNewLines($response['content'], $lastLogPosition);
-
-                    if (! empty($newLines)) {
-                        foreach ($newLines as $line) {
-                            if (trim($line) !== '') { // Skip empty lines
-                                if ($onNewLines) {
-                                    $onNewLines($line);
-                                } else {
-                                    echo $line.PHP_EOL;
-                                }
-                            }
-                        }
-
-                        $lastLogPosition += count($newLines);
-                    }
+                if (! $site) {
+                    throw new Exception('Failed to fetch site details.');
                 }
 
-                // Check deployment status to see if we should stop polling
-                $deployment = $this->getDeployment($serverId, $siteId, $deploymentId);
-                if ($deployment && ! in_array($deployment['status'], ['pending', 'running', 'deploying'])) {
-                    $isActive = false;
+                $currentLog = $site['current_deploy_log'] ?? null;
+                $status = $site['status'] ?? null;
 
-                    // Show final status
-                    if ($onNewLines) {
-                        $onNewLines("Deployment {$deployment['status']}");
-                    }
+                if ($currentLog !== null) {
+                    $hadLogContent = true;
+                    $lastLogPosition += $this->emitNewLines($currentLog, $lastLogPosition, $onNewLines);
                 }
 
-                if ($isActive) {
-                    sleep($pollInterval);
-                    $pollAttempts++;
+                // Deployment finished if the API reports a terminal status, or if it cleared
+                // the log buffer after we had previously seen content.
+                $finished = in_array($status, self::FINAL_STATUSES, true)
+                    || ($hadLogContent && $currentLog === null);
+
+                if ($finished) {
+                    // The live `current_deploy_log` buffer is cleared the moment a deployment
+                    // finishes, so its final lines never get polled. Emit anything we missed
+                    // from the persisted deploy log before returning.
+                    $lastLogPosition += $this->flushPersistedLog($serverId, $siteId, $lastLogPosition, $onNewLines);
+
+                    return $status;
                 }
 
-                // Reset retry count on successful poll
+                sleep(self::POLL_INTERVAL);
+                $pollAttempts++;
                 $retryCount = 0;
-
             } catch (Exception $e) {
                 $retryCount++;
 
-                if ($retryCount >= $maxRetries) {
+                if ($retryCount >= self::MAX_RETRIES) {
                     throw new Exception('Max retries reached. Last error: '.$e->getMessage());
                 }
 
+                $message = "Error polling logs (retry $retryCount/".self::MAX_RETRIES.'): '.$e->getMessage();
+
                 if ($onNewLines) {
-                    $onNewLines("Error polling logs (retry {$retryCount}/{$maxRetries}): ".$e->getMessage());
+                    $onNewLines($message);
                 } else {
-                    echo "Error polling logs (retry {$retryCount}/{$maxRetries}): ".$e->getMessage().PHP_EOL;
+                    echo $message.PHP_EOL;
                 }
 
-                sleep(5); // Wait longer on error
+                sleep(self::RETRY_BACKOFF);
             }
         }
 
-        if ($pollAttempts >= $maxPollAttempts) {
-            $message = 'Log polling timeout reached (10 minutes). Deployment may still be in progress.';
-            if ($onNewLines) {
-                $onNewLines($message);
-            } else {
-                echo $message.PHP_EOL;
+        $timeoutMessage = 'Log polling timeout reached (10 minutes). Deployment may still be in progress.';
+
+        if ($onNewLines) {
+            $onNewLines($timeoutMessage);
+        } else {
+            echo $timeoutMessage.PHP_EOL;
+        }
+
+        return null;
+    }
+
+    /**
+     * Emit every non-empty line past `$lastPosition` and return how many lines were consumed.
+     */
+    private function emitNewLines(string $content, int $lastPosition, ?callable $onNewLines): int
+    {
+        $newLines = $this->extractNewLines($content, $lastPosition);
+
+        foreach ($newLines as $line) {
+            if (trim($line) === '') {
+                continue;
             }
+
+            if ($onNewLines) {
+                $onNewLines($line);
+            } else {
+                echo $line.PHP_EOL;
+            }
+        }
+
+        return count($newLines);
+    }
+
+    /**
+     * Fetch the persisted deploy log and emit any lines the live buffer never streamed.
+     *
+     * Best-effort: a failure here does not affect the already-reported deployment status.
+     */
+    private function flushPersistedLog(int $serverId, int $siteId, int $lastPosition, ?callable $onNewLines): int
+    {
+        try {
+            $logs = $this->ploi->getSiteLogs($serverId, $siteId, 1)['data'] ?? [];
+
+            if (empty($logs)) {
+                return 0;
+            }
+
+            $content = $this->ploi->getSiteLog($serverId, $siteId, $logs[0]['id'])['data']['content'] ?? null;
+
+            if ($content === null) {
+                return 0;
+            }
+
+            return $this->emitNewLines($content, $lastPosition, $onNewLines);
+        } catch (Exception $e) {
+            return 0;
         }
     }
 
     /**
-     * Extract new lines from log content based on last position
+     * Slice lines past the last reported position.
+     *
+     * @return array<int, string>
      */
     private function extractNewLines(string $content, int $lastPosition): array
     {
@@ -114,103 +159,5 @@ class DeploymentLogPoller
         }
 
         return [];
-    }
-
-    /**
-     * Get deployment log content
-     *
-     * @throws Exception
-     */
-    private function getDeploymentLog(int $serverId, int $siteId, int $deploymentId): ?array
-    {
-        $response = $this->makeApiRequest("servers/{$serverId}/sites/{$siteId}/deployments/{$deploymentId}/log");
-
-        return $response['data'] ?? null;
-    }
-
-    /**
-     * Get deployment status
-     *
-     * @throws Exception
-     */
-    private function getDeployment(int $serverId, int $siteId, int $deploymentId): ?array
-    {
-        $response = $this->makeApiRequest("servers/{$serverId}/sites/{$siteId}/deployments");
-
-        $deployments = $response['data'] ?? [];
-
-        foreach ($deployments as $deployment) {
-            if ($deployment['id'] == $deploymentId) {
-                return $deployment;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Make authenticated API request
-     *
-     * @throws Exception
-     */
-    private function makeApiRequest(string $endpoint): array
-    {
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.$this->apiKey,
-            'Accept' => 'application/json',
-            'User-Agent' => 'Ploi CLI',
-        ])->get($this->baseUrl.'/'.$endpoint);
-
-        if (! $response->successful()) {
-            throw new Exception('API request failed: '.$response->body());
-        }
-
-        return $response->json();
-    }
-
-    /**
-     * Get the latest deployment for a site
-     *
-     * @throws Exception
-     */
-    public function getLatestDeployment(int $serverId, int $siteId): ?array
-    {
-        $response = $this->makeApiRequest("servers/{$serverId}/sites/{$siteId}/deployments?per_page=1");
-
-        $deployments = $response['data'] ?? [];
-
-        return $deployments[0] ?? null;
-    }
-
-    /**
-     * Check if there's an active deployment
-     *
-     * @throws Exception
-     */
-    public function getActiveDeployment(int $serverId, int $siteId): ?array
-    {
-        $response = $this->makeApiRequest("servers/{$serverId}/sites/{$siteId}/deployments");
-
-        $deployments = $response['data'] ?? [];
-
-        foreach ($deployments as $deployment) {
-            if (in_array($deployment['status'], ['pending', 'running', 'deploying'])) {
-                return $deployment;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Get all deployments for a site
-     *
-     * @throws Exception
-     */
-    public function getDeployments(int $serverId, int $siteId): array
-    {
-        $response = $this->makeApiRequest("servers/{$serverId}/sites/{$siteId}/deployments");
-
-        return $response['data'] ?? [];
     }
 }

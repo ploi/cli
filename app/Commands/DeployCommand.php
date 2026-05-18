@@ -17,7 +17,7 @@ class DeployCommand extends Command
 {
     use EnsureHasToken, HasPloiConfiguration, InteractWithServer, InteractWithSite;
 
-    protected $signature = 'deploy {--server=} {--site=} {--schedule=} {--stream : Stream deployment logs in real-time} {--deployment-id= : Specific deployment ID to stream}';
+    protected $signature = 'deploy {--server=} {--site=} {--schedule=} {--no-stream : Disable real-time deployment log streaming}';
 
     protected $description = 'Deploy your site to Ploi.io with optional log streaming.';
 
@@ -34,7 +34,7 @@ class DeployCommand extends Command
         $data = [];
         $isScheduled = false;
 
-        if ($this->ploi->getSiteDetails($serverId, $siteId)['data']['has_staging']) {
+        if ($this->site['has_staging']) {
             $this->warn("{$this->site['domain']} has a staging environment.");
             $deployToProduction = confirm(
                 label: 'Do you want to deploy to production? (yes/no)',
@@ -58,17 +58,6 @@ class DeployCommand extends Command
         }
 
         $this->deploy($serverId, $siteId, $this->site['domain'], $data, $isScheduled);
-
-        // Handle streaming after deployment
-        if ($this->option('stream') && ! $isScheduled) {
-            $deploymentId = $this->option('deployment-id') ?? $this->getLatestDeploymentId($serverId, $siteId);
-
-            if ($deploymentId) {
-                $this->streamDeploymentLogs($serverId, $siteId, $deploymentId);
-            } else {
-                $this->error('No deployment found to stream');
-            }
-        }
     }
 
     protected function validateScheduleDatetime(string $datetime): void
@@ -106,21 +95,27 @@ class DeployCommand extends Command
             return;
         }
 
-        $this->pollDeploymentStatus($serverId, $siteId, $domain);
+        if ($this->option('no-stream')) {
+            $this->pollDeploymentStatus($serverId, $siteId, $domain);
+
+            return;
+        }
+
+        $this->streamAndAwait($serverId, $siteId, $domain);
     }
 
     protected function pollDeploymentStatus(string $serverId, string $siteId, string $domain): void
     {
-        $maxAttempts = 60;   // Maximum number of polling attempts (10 minutes total with 10-second delay)
-        $delay = 5;         // Delay between each attempt in seconds
+        $maxAttempts = 60;   // Maximum number of polling attempts (5 minutes total with 5-second delay)
+        $delay = 5;          // Delay between each attempt in seconds
 
         $this->info('Deployment initiated!');
+
         $status = spin(
             callback: function () use ($serverId, $siteId, $domain, $maxAttempts, $delay) {
                 for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
                     $deploymentStatus = $this->ploi->getSiteDetails($serverId, $siteId)['data']['status'] ?? 'deploying';
 
-                    // If we get a final status, return it
                     if (in_array($deploymentStatus, ['active', 'deploy-failed'])) {
                         return [
                             'status' => $deploymentStatus,
@@ -131,7 +126,6 @@ class DeployCommand extends Command
                     sleep($delay);
                 }
 
-                // If we've exceeded max attempts, return timeout status
                 return [
                     'status' => 'timeout',
                     'domain' => $domain,
@@ -140,59 +134,41 @@ class DeployCommand extends Command
             message: 'Checking deployment status...'
         );
 
-        // Handle the deployment result
         match ($status['status']) {
             'active' => $this->handleSuccessfulDeployment($serverId, $siteId, $status['domain']),
             'deploy-failed' => $this->handleFailedDeployment($serverId, $siteId),
             'timeout' => $this->warn('Deployment status check timed out. Please check manually.'),
-            default => $this->warn('Deployment status is unknown. Please check manually.')
+            default => $this->warn('Deployment status is unknown. Please check manually.'),
         };
     }
 
-    /**
-     * Stream deployment logs in real-time
-     *
-     * @return void
-     */
-    private function streamDeploymentLogs(int $serverId, int $siteId, int $deploymentId)
+    private function streamAndAwait(int $serverId, int $siteId, string $domain): void
     {
         $this->info('🔄 Streaming deployment logs...');
         $this->newLine();
 
-        $poller = new DeploymentLogPoller(config('ploi.token'));
+        $poller = new DeploymentLogPoller($this->ploi);
 
         try {
-            $poller->pollDeploymentLogs($serverId, $siteId, $deploymentId, function ($line) {
-                // Format the log line with timestamp
+            $status = $poller->pollDeploymentLogs($serverId, $siteId, function ($line) {
                 $timestamp = now()->format('H:i:s');
-                $this->line("<fg=gray>[{$timestamp}]</fg=gray> {$line}");
+                $this->line("<fg=gray>[{$timestamp}]</> {$line}");
             });
-
-            $this->newLine();
-            $this->success('✅ Deployment streaming completed!');
-
         } catch (Exception $e) {
             $this->newLine();
-            $this->error('❌ Streaming failed: '.$e->getMessage());
+            $this->warn('Log streaming failed ('.$e->getMessage().'), falling back to status checks...');
+            $this->pollDeploymentStatus($serverId, $siteId, $domain);
+
+            return;
         }
-    }
 
-    /**
-     * Get the latest deployment ID for streaming
-     */
-    private function getLatestDeploymentId(int $serverId, int $siteId): ?int
-    {
-        $poller = new DeploymentLogPoller(config('ploi.token'));
+        $this->newLine();
 
-        try {
-            $deployment = $poller->getLatestDeployment($serverId, $siteId);
-
-            return isset($deployment['id']) ? (int) $deployment['id'] : null;
-        } catch (Exception $e) {
-            $this->error('Failed to get latest deployment: '.$e->getMessage());
-
-            return null;
-        }
+        match ($status) {
+            'active' => $this->handleSuccessfulDeployment($serverId, $siteId, $domain),
+            'deploy-failed' => $this->handleFailedDeployment($serverId, $siteId),
+            default => $this->warn('Deployment status check timed out. Please check manually.'),
+        };
     }
 
     /**
@@ -210,8 +186,8 @@ class DeployCommand extends Command
     {
         $this->error('Your recent deployment has failed, please check recent deploy log for errors.');
 
-        // Show link to deployment logs if not streaming
-        if (! $this->option('stream')) {
+        // When streaming, the failed log output is already shown inline.
+        if ($this->option('no-stream')) {
             $this->showLogLink($serverId, $siteId);
         }
     }
@@ -222,7 +198,6 @@ class DeployCommand extends Command
     private function showLogLink(string $serverId, string $siteId): void
     {
         try {
-            // Get the latest deployment log ID
             $logs = $this->ploi->getSiteLogs($serverId, $siteId, 1)['data'];
 
             if (! empty($logs)) {
